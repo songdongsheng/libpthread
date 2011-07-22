@@ -1,0 +1,39 @@
+#
+# NOTE! Don't add files that are generated in specific
+# subdirectories here. Add them in the ".gitignore" file
+# in that subdirectory instead.
+#
+# NOTE! Please use 'git ls-files -i --exclude-standard'
+# command after changing this file, to see if there are
+# any tracked files which get ignored after the change.
+#
+# Normal rules
+#
+.*
+*~
+*.a
+*.bz2
+*.dll
+*.exe
+*.gz
+*.lst
+*.lzma
+*.lzo
+*.o
+*.o.*
+*.orig
+*.patch
+*.s
+*.so
+*.xz
+
+#
+# Top-level generic files
+#
+/aclocal.m4
+/config.h.in
+
+#
+# git files that we don't want to ignore even it they are dot-files
+#
+!.gitignore

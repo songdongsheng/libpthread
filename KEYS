@@ -1,0 +1,7 @@
+This file contains the PGP & GPG keys of various Libpthread developers.
+Please ensure that your key is also available via the PGP keyservers
+(such as pgpkeys.mit.edu).
+
+Type  Bits/KeyID     Date       User ID
+pub   2048R/46D397FF 2008-02-02 Dongsheng Song <dongsheng@apache.org>
+      Key fingerprint = 3DA8 ECBB 5757 2D64 9F3C  0811 0401 AA20 46D3 97FF

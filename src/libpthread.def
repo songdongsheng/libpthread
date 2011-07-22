@@ -1,0 +1,52 @@
+EXPORTS
+    ;pthread_create
+    ;pthread_exit
+    ;pthread_self
+    ;pthread_equal
+    ;pthread_detach
+    ;pthread_join
+
+    ;pthread_cleanup_push
+    ;pthread_cleanup_pop
+
+    ;pthread_cancel
+    ;pthread_kill
+    ;pthread_setcancelstate
+    ;pthread_setcanceltype
+    ;pthread_testcancel
+
+    ;pthread_attr_init
+    ;pthread_attr_destroy
+    ;pthread_attr_getstacksize
+    ;pthread_attr_setstacksize
+    ;pthread_attr_setdetachstate
+    ;pthread_attr_getdetachstate
+
+    ;pthread_key_create
+    ;pthread_key_delete
+    ;pthread_setspecific
+    ;pthread_getspecific
+
+    ;pthread_mutex_destroy
+    ;pthread_mutex_init
+    ;pthread_mutex_lock
+    ;pthread_mutex_unlock
+
+    sched_get_priority_max
+    sched_get_priority_min
+    sched_getparam
+    sched_getscheduler
+    sched_rr_get_interval
+    sched_setparam
+    sched_setscheduler
+    sched_yield
+
+    sem_init
+    sem_destroy
+    sem_trywait
+    sem_timedwait
+    sem_wait
+    sem_post
+    sem_open
+    sem_close
+    sem_unlink
