@@ -1,5 +1,6 @@
 #
 # http://www.cmake.org/Wiki/CMake
+# http://www.cmake.org/Wiki/CMake_Useful_Variables
 # cmake --help
 # cmake --help-command-list
 #
@@ -43,6 +44,8 @@ SET(Libpthread_VERSION_MAJOR 0)
 SET(Libpthread_VERSION_MINOR 1)
 SET(Libpthread_VERSION_PATCH 0)
 
+# SET (CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} $ENV{LDFLAGS})
+
 if (MSVC)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
     ADD_DEFINITIONS("/DWIN32_LEAN_AND_MEAN /D_WIN32_WINNT=0x0502 /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS")
@@ -53,9 +56,9 @@ ELSEIF(CMAKE_COMPILER_IS_GNUCC)
     IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
         # perform coverage test by gcov
         SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra -Wformat-security -fprofile-arcs -ftest-coverage")
-        SET(LINK_FLAGS_DEBUG "${LINK_FLAGS_DEBUG} -static")
+        SET (CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} "-Wl,-static")
     ELSE()
-        SET(LINK_FLAGS_RELEASE "${LINK_FLAGS_RELEASE} -static -s")
+        SET (CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} "-Wl,-static,--strip-all")
     ENDIF()
 
 ENDIF()
