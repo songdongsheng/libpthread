@@ -12,7 +12,6 @@
 # cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=gmake
 #
 # http://www.cmake.org/Wiki/CMake_Cross_Compiling
-# LDFLAGS="-m64 -s -static" \
 # cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc
 #
 # If you want to use 32bit gcc which is capable of multilib support to generate 64bit objects:
@@ -29,6 +28,7 @@
 #
 # export PATH=${HOME}/gcc-4.6-windows-linux/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # i686-w64-mingw32-gcc -march=x86-64 -mtune=generic -dM -E -  < /dev/null | sort
+# make VERBOSE=1
 # signtool sign /t http://timestamp.verisign.com/scripts/timstamp.dll libpthread.dll
 #
 
@@ -45,22 +45,25 @@ SET(Libpthread_VERSION_PATCH 0)
 
 if (MSVC)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
-    ADD_DEFINITIONS("/DWIN32_LEAN_AND_MEAN /D_WIN32_WINNT=0x0500 /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS")
+    ADD_DEFINITIONS("/DWIN32_LEAN_AND_MEAN /D_WIN32_WINNT=0x0502 /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS")
 ELSEIF(CMAKE_COMPILER_IS_GNUCC)
+    ADD_DEFINITIONS("-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0502")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+
     IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
         # perform coverage test by gcov
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static -Wall -Wextra -Wformat-security -fprofile-arcs -ftest-coverage")
+        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra -Wformat-security -fprofile-arcs -ftest-coverage")
+        SET(LINK_FLAGS_DEBUG "${LINK_FLAGS_DEBUG} -static")
     ELSE()
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static -Wall")
+        SET(LINK_FLAGS_RELEASE "${LINK_FLAGS_RELEASE} -static -s")
     ENDIF()
 
-    ADD_DEFINITIONS("-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0500")
 ENDIF()
 
 # INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}")
 INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/include")
 
-# ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(src)
 # ADD_SUBDIRECTORY(test)
 
 # http://www.cmake.org/Wiki/CMake_Testing_With_CTest

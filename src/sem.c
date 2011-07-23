@@ -6,6 +6,7 @@
 
 #include "semaphore.h"
 #include "arch_sem.h"
+#include "misc.h"
 
 #ifndef PTHREAD_PROCESS_SHARED
     #define PTHREAD_PROCESS_SHARED      0
@@ -15,8 +16,6 @@
 #ifndef ETIMEDOUT
 #define ETIMEDOUT       138
 #endif
-
-extern HANDLE _libpthread_proc_heap;
 
 int sem_init(sem_t *sem, int pshared, unsigned int value)
 {
@@ -28,11 +27,11 @@ int sem_init(sem_t *sem, int pshared, unsigned int value)
     if (pshared != PTHREAD_PROCESS_PRIVATE)
         return set_errno(EPERM);
 
-    if (NULL == (pv = (arch_sem_t *)HeapAlloc(_libpthread_proc_heap, HEAP_ZERO_MEMORY, sizeof(arch_sem_t))))
+    if (NULL == (pv = (arch_sem_t *)calloc(1, sizeof(arch_sem_t))))
         return set_errno(ENOMEM);
 
     if ((pv->handle = CreateSemaphore (NULL, 0, SEM_VALUE_MAX, NULL)) == NULL) {
-        HeapFree(_libpthread_proc_heap, 0, pv);
+        free(pv);
         return set_errno(ENOSPC);
     }
 
@@ -45,7 +44,7 @@ int sem_destroy(sem_t *sem)
 {
     arch_sem_t *pv = (arch_sem_t *) sem;
 
-    if (sem == NULL || pv == NULL)
+    if (pv == NULL)
         return set_errno(EINVAL);
 
     if (pv->value < 0)
@@ -54,7 +53,7 @@ int sem_destroy(sem_t *sem)
     if (CloseHandle (pv->handle) == 0)
         return set_errno(EINVAL);
 
-    HeapFree(_libpthread_proc_heap, 0, pv);
+    free(pv);
     return 0;
 }
 
@@ -130,7 +129,7 @@ sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)
         return NULL;
     }
 
-    if (NULL == (pv = (arch_sem_t *)HeapAlloc(_libpthread_proc_heap, HEAP_ZERO_MEMORY, sizeof(arch_sem_t)))) {
+    if (NULL == (pv = (arch_sem_t *)calloc(1, sizeof(arch_sem_t)))) {
         set_errno(ENOMEM);
         return NULL;
     }
@@ -143,7 +142,7 @@ sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)
     if((pv->handle = OpenSemaphoreA(SEMAPHORE_MODIFY_STATE, FALSE, buffer)) != NULL) {
         if ((oflag & O_CREAT) && (oflag & O_EXCL)) {
             CloseHandle(pv->handle);
-            HeapFree(_libpthread_proc_heap, 0, pv);
+            free(pv);
             set_errno(EEXIST);
             return NULL;
         }
@@ -152,20 +151,20 @@ sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)
 
     rc = GetLastError();
     if (rc != ERROR_SEM_NOT_FOUND) {
-        HeapFree(_libpthread_proc_heap, 0, pv);
+        free(pv);
         set_errno(EPERM);
         return NULL;
     }
 
     if (!(oflag & O_CREAT)) {
-        HeapFree(_libpthread_proc_heap, 0, pv);
+        free(pv);
         set_errno(ENOENT);
         return NULL;
     }
 
     if ((pv->handle = CreateSemaphore (NULL, 0, SEM_VALUE_MAX, buffer)) == NULL)
     {
-        HeapFree(_libpthread_proc_heap, 0, pv);
+        free(pv);
         set_errno(ENOSPC);
         return NULL;
     }

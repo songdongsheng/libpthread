@@ -3,22 +3,12 @@
 #define PT4W_VERSION 0,1,0,0
 #define PT4W_VERSION_STRING "0, 1, 0, 0\0"
 
-#ifdef _WIN64
-    #if defined(_MSC_VER)
-        #define PT4W_VERSIONINFO_COMMENT "POSIX threads for Windows - 64bit (Microsoft C/C++ build)\0"
-    #elif defined(__GNUC__)
-        #define PT4W_VERSIONINFO_COMMENT "POSIX threads for Windows - 64bit (GNU C build)\0"
-    #else
-        #define PT4W_VERSIONINFO_COMMENT "POSIX threads for Windows - 64bit\0"
-    #endif
+#if defined(_MSC_VER)
+    #define PT4W_VERSIONINFO_COMMENT "POSIX threads for Windows - Microsoft C/C++ build\0"
+#elif defined(__GNUC__)
+    #define PT4W_VERSIONINFO_COMMENT "POSIX threads for Windows - GNU C build\0"
 #else
-    #if defined(_MSC_VER)
-        #define PT4W_VERSIONINFO_COMMENT "POSIX threads for Windows - 32bit (Microsoft C/C++ build)\0"
-    #elif defined(__GNUC__)
-        #define PT4W_VERSIONINFO_COMMENT "POSIX threads for Windows - 32bit (GNU C build)\0"
-    #else
-        #define PT4W_VERSIONINFO_COMMENT "POSIX threads for Windows - 32bit\0"
-    #endif
+    #define PT4W_VERSIONINFO_COMMENT "POSIX threads for Windows\0"
 #endif
 
 VS_VERSION_INFO VERSIONINFO
