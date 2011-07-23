@@ -1,6 +1,7 @@
 ADD_LIBRARY(pthread SHARED libpthread.def version.rc
         sched.c
-        sem.c)
+        sem.c
+        init_shared.c)
 SET_TARGET_PROPERTIES(pthread PROPERTIES VERSION 0.1)
 
 IF(CMAKE_COMPILER_IS_GNUCC AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
@@ -14,7 +15,8 @@ INSTALL(TARGETS pthread
 
 ADD_LIBRARY(pthread_static STATIC
         sched.c
-        sem.c)
+        sem.c
+        init_static.c)
 SET_TARGET_PROPERTIES(pthread_static PROPERTIES OUTPUT_NAME "pthread")
 INSTALL(TARGETS pthread_static
         RUNTIME DESTINATION bin
