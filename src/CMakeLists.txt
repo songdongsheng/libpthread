@@ -13,12 +13,16 @@ INSTALL(TARGETS pthread
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 
-ADD_LIBRARY(pthread_static STATIC
-        sched.c
-        sem.c
-        init_static.c)
-SET_TARGET_PROPERTIES(pthread_static PROPERTIES OUTPUT_NAME "pthread")
-INSTALL(TARGETS pthread_static
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+#
+# It's complex and expensive in static libray automatically initialized.
+# Therefore, I do not intend to support static library in the near future.
+#
+#ADD_LIBRARY(pthread_static STATIC
+#        sched.c
+#        sem.c
+#        init_static.c)
+#SET_TARGET_PROPERTIES(pthread_static PROPERTIES OUTPUT_NAME "pthread")
+#INSTALL(TARGETS pthread_static
+#        RUNTIME DESTINATION bin
+#        LIBRARY DESTINATION lib
+#        ARCHIVE DESTINATION lib)

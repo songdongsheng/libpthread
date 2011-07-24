@@ -2,7 +2,7 @@
 
 #include <winsock2.h>
 
-static inline int set_errno(int result)
+static __inline int set_errno(int result)
 {
     if (result != 0) {
         errno = result;
@@ -21,7 +21,7 @@ static __inline __int64 FileTimeToUnixTime(FILETIME *input)
 }
 
 /* Return micro-seconds since the Unix epoch (jan. 1, 1970) UTC */
-static inline __int64 arch_time_in_us(void)
+static __inline __int64 arch_time_in_us(void)
 {
     FILETIME time;
 
@@ -29,12 +29,12 @@ static inline __int64 arch_time_in_us(void)
     return FileTimeToUnixTime(&time);
 }
 
-static inline __int64 arch_time_in_us_from_timespec(const struct timespec *ts)
+static __inline __int64 arch_time_in_us_from_timespec(const struct timespec *ts)
 {
     return ts->tv_sec * 1000000LL + ts->tv_nsec / 1000;
 }
 
-static inline unsigned arch_rel_time_in_ms(const struct timespec *ts)
+static __inline unsigned arch_rel_time_in_ms(const struct timespec *ts)
 {
     __int64 t1 = arch_time_in_us_from_timespec(ts);
     __int64 t2 = arch_time_in_us();

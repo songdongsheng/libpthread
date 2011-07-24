@@ -2,12 +2,12 @@
 
 DWORD libpthread_tls_index;
 
-BOOL libpthread_fini(void) {
+static BOOL libpthread_fini(void) {
     TlsFree(libpthread_tls_index);
     return TRUE;
 }
 
-BOOL libpthread_init(void) {
+static BOOL libpthread_init(void) {
     if ((libpthread_tls_index = TlsAlloc()) == TLS_OUT_OF_INDEXES)
         return FALSE;
 

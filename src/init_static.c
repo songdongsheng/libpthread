@@ -1,5 +1,9 @@
 #include <winsock2.h>
 
+/*
+ * It's complex and expensive in static libray automatically initialized.
+ * Therefore, I do not intend to support static library in the near future.
+ */
 DWORD libpthread_tls_index;
 
 void __cdecl libpthread_fini(void) {
