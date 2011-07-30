@@ -25,17 +25,26 @@ typedef _mode_t mode_t;
 #ifndef _TIMESPEC_DEFINED
 #define _TIMESPEC_DEFINED
 struct timespec {
-  time_t  tv_sec;       /* Seconds */
-  long    tv_nsec;      /* Nanoseconds */
+    time_t  tv_sec;       /* Seconds */
+    long    tv_nsec;      /* Nanoseconds */
 };
 
 struct itimerspec {
-  struct timespec  it_interval; /* Timer period */
-  struct timespec  it_value;    /* Timer expiration */
+    struct timespec  it_interval; /* Timer period */
+    struct timespec  it_value;    /* Timer expiration */
 };
 #endif  /* _TIMESPEC_DEFINED */
 
 typedef void    *sem_t;
+
+#ifndef PTHREAD_PROCESS_SHARED
+    #define PTHREAD_PROCESS_SHARED      0
+    #define PTHREAD_PROCESS_PRIVATE     1
+#endif
+
+#ifndef ETIMEDOUT
+#define ETIMEDOUT       138
+#endif
 
 #define SEM_VALUE_MAX   INT_MAX
 #define SEM_FAILED      NULL

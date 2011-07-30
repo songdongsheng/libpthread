@@ -29,6 +29,18 @@ static __inline __int64 arch_time_in_us(void)
     return FileTimeToUnixTime(&time);
 }
 
+/* Return micro-seconds since the Unix epoch (jan. 1, 1970) UTC */
+static __inline void arch_time_in_timespec(struct timespec *ts)
+{
+    __int64 t;
+    FILETIME time;
+
+    GetSystemTimeAsFileTime(&time);
+    t = FileTimeToUnixTime(&time);
+    ts->tv_sec = t / 1000000;
+    ts->tv_nsec= (t % 1000000) * 1000;
+}
+
 static __inline __int64 arch_time_in_us_from_timespec(const struct timespec *ts)
 {
     return ts->tv_sec * 1000000LL + ts->tv_nsec / 1000;

@@ -8,15 +8,6 @@
 #include "arch_sem.h"
 #include "misc.h"
 
-#ifndef PTHREAD_PROCESS_SHARED
-    #define PTHREAD_PROCESS_SHARED      0
-    #define PTHREAD_PROCESS_PRIVATE     1
-#endif
-
-#ifndef ETIMEDOUT
-#define ETIMEDOUT       138
-#endif
-
 int sem_init(sem_t *sem, int pshared, unsigned int value)
 {
     arch_sem_t *pv;
@@ -124,7 +115,7 @@ sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)
     char buffer[512];
     arch_sem_t *pv;
 
-    if (value > (unsigned int) SEM_VALUE_MAX || (len = strlen(name)) > sizeof(buffer) - 8) {
+    if (value > (unsigned int) SEM_VALUE_MAX || (len = strlen(name)) > sizeof(buffer) - 8 || len < 1) {
         set_errno(EINVAL);
         return NULL;
     }
