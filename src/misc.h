@@ -53,5 +53,5 @@ static __inline unsigned arch_rel_time_in_ms(const struct timespec *ts)
 
     if (t1 < t2) return 0;
 
-    return (unsigned) (t1 - t2);
+    return (unsigned) ((t1 - t2) / 1000);
 }

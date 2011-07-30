@@ -25,12 +25,12 @@ int sched_setscheduler(pid_t pid, int policy, const struct sched_param *param)
 
 int sched_get_priority_min(int policy)
 {
-    return THREAD_PRIORITY_IDLE;
+    return 1; /* THREAD_PRIORITY_IDLE */
 }
 
 int sched_get_priority_max(int policy)
 {
-    return THREAD_PRIORITY_TIME_CRITICAL;
+    return 15; /* THREAD_PRIORITY_TIME_CRITICAL */
 }
 
 int sched_setparam(pid_t pid, const struct sched_param *param)
@@ -40,7 +40,7 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
 
 int sched_getparam(pid_t pid, struct sched_param *param)
 {
-    param->sched_priority = THREAD_PRIORITY_NORMAL;
+    param->sched_priority = 8; /* THREAD_PRIORITY_NORMAL */
     return 0;
 }
 

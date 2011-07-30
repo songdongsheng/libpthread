@@ -21,7 +21,7 @@ int sem_init(sem_t *sem, int pshared, unsigned int value)
     if (NULL == (pv = (arch_sem_t *)calloc(1, sizeof(arch_sem_t))))
         return set_errno(ENOMEM);
 
-    if ((pv->handle = CreateSemaphore (NULL, 0, SEM_VALUE_MAX, NULL)) == NULL) {
+    if ((pv->handle = CreateSemaphore (NULL, 0, value, NULL)) == NULL) {
         free(pv);
         return set_errno(ENOSPC);
     }
@@ -45,6 +45,8 @@ int sem_destroy(sem_t *sem)
         return set_errno(EINVAL);
 
     free(pv);
+    *sem = NULL;
+
     return 0;
 }
 
@@ -127,7 +129,7 @@ sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)
 
     memcpy(buffer, "Global\\", 7);
     memcpy(buffer + 7, name, len);
-    buffer[len + 8] = '\0';
+    buffer[len + 7] = '\0';
 
     /* Only the creater can unlink the semaphore ! */
     if((pv->handle = OpenSemaphoreA(SEMAPHORE_MODIFY_STATE, FALSE, buffer)) != NULL) {
@@ -141,7 +143,7 @@ sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)
     }
 
     rc = GetLastError();
-    if (rc != ERROR_SEM_NOT_FOUND) {
+    if (rc != ERROR_SEM_NOT_FOUND && rc != ERROR_FILE_NOT_FOUND) {
         free(pv);
         set_errno(EPERM);
         return NULL;
@@ -153,7 +155,7 @@ sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)
         return NULL;
     }
 
-    if ((pv->handle = CreateSemaphore (NULL, 0, SEM_VALUE_MAX, buffer)) == NULL)
+    if ((pv->handle = CreateSemaphore (NULL, 0, value, buffer)) == NULL)
     {
         free(pv);
         set_errno(ENOSPC);

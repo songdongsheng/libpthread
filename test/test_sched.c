@@ -1,6 +1,7 @@
 #include <assert.h>
+#include <stdio.h>
 #include <string.h>
-
+#include <winsock2.h>
 #include "sched.h"
 
 int main(int argc, char *argv[])
@@ -14,30 +15,38 @@ int main(int argc, char *argv[])
 
     rc = sched_yield();
     assert(rc == 0);
+    printf("sched_yield passed\n");
 
     rc = sched_getscheduler(pid);
     assert(rc == SCHED_OTHER);
+    printf("sched_getscheduler passed\n");
 
     rc = sched_setscheduler(pid, priority, &sp);
     assert(rc == 0);
+    printf("sched_setscheduler passed\n");
 
     rc = sched_get_priority_min(pid);
-    assert(rc == THREAD_PRIORITY_IDLE);
+    assert(rc == 1);
+    printf("sched_get_priority_min passed\n");
 
     rc = sched_get_priority_max(pid);
-    assert(rc == THREAD_PRIORITY_TIME_CRITICAL);
+    assert(rc == 15);
+    printf("sched_get_priority_max passed\n");
 
     rc = sched_setparam(pid, &sp);
     assert(rc == 0);
+    printf("sched_setparam passed\n");
 
     rc = sched_getparam(pid, &sp);
     assert(rc == 0);
-    assert(sp.sched_priority == THREAD_PRIORITY_NORMAL);
+    assert(sp.sched_priority == 8);
+    printf("sched_getparam passed\n");
 
     rc = sched_rr_get_interval(pid, &tp);
     assert(rc == 0);
     assert(tp.tv_sec == 0);
     assert(tp.tv_nsec == 15625000);
+    printf("sched_rr_get_interval passed\n");
 
     return 0;
 }
