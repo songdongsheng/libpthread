@@ -11,7 +11,7 @@
 int x = 8;
 
 /* mfence */
-__declspec(noinline) test_sync(void)
+__declspec(noinline) void test_sync(void)
 {
     x = 9;
     __sync_synchronize();

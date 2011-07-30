@@ -4,11 +4,11 @@
 #define PT4W_VERSION_STRING "0, 1, 0, 0\0"
 
 #if defined(_MSC_VER)
-    #define PT4W_VERSIONINFO_COMMENT "POSIX threads for Windows - Microsoft C/C++ build\0"
+    #define PT4W_VERSIONINFO_COMMENT "POSIX thread for Windows - Microsoft C/C++ build\0"
 #elif defined(__GNUC__)
-    #define PT4W_VERSIONINFO_COMMENT "POSIX threads for Windows - GNU C build\0"
+    #define PT4W_VERSIONINFO_COMMENT "POSIX thread for Windows - GNU C build\0"
 #else
-    #define PT4W_VERSIONINFO_COMMENT "POSIX threads for Windows\0"
+    #define PT4W_VERSIONINFO_COMMENT "POSIX thread for Windows\0"
 #endif
 
 VS_VERSION_INFO VERSIONINFO
