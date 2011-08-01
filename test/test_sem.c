@@ -22,8 +22,7 @@ int main(int argc, char *argv[])
     printf("sem_wait passed\n");
 */
     rc = sem_trywait(sem);
-    assert(rc == -1);
-    assert(errno == ETIMEDOUT);
+    assert(rc == 0);
     printf("sem_trywait passed\n");
 
     arch_time_in_timespec(&tp);
@@ -50,9 +49,6 @@ int main(int argc, char *argv[])
     sem = sem_open("MySem", 0, 0, 1);
     assert(sem == NULL);
     printf("sem_open passed\n");
-
-    sem = NULL;
-    printf("sem_open passed 222\n");
 
     sem = sem_open("MySem", O_CREAT, 0, 1);
     assert(sem != NULL);

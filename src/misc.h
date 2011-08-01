@@ -1,3 +1,6 @@
+#ifndef _MISC_H_
+#define _MISC_H_    1
+
 #include <errno.h>
 
 #include <winsock2.h>
@@ -14,7 +17,7 @@ static __inline int set_errno(int result)
 /* Number of micro-seconds between the beginning of the Windows epoch
  * (Jan. 1, 1601) and the Unix epoch (Jan. 1, 1970)
  */
-#define DELTA_EPOCH_IN_USEC     11644473600000000LL;
+#define DELTA_EPOCH_IN_USEC     11644473600000000LL
 static __inline __int64 FileTimeToUnixTime(FILETIME *input)
 {
     return (((__int64) input->dwHighDateTime) << 32 | input->dwLowDateTime) / 10 - DELTA_EPOCH_IN_USEC;
@@ -50,8 +53,12 @@ static __inline unsigned arch_rel_time_in_ms(const struct timespec *ts)
 {
     __int64 t1 = arch_time_in_us_from_timespec(ts);
     __int64 t2 = arch_time_in_us();
+    unsigned t = (unsigned) ((t1 - t2) / 1000);
 
-    if (t1 < t2) return 0;
+    if (t1 < t2 || t1 >= t2 + 1000LL * 4294967295)
+        return 0;
 
     return (unsigned) ((t1 - t2) / 1000);
 }
+
+#endif

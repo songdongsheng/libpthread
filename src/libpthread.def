@@ -1,5 +1,31 @@
 EXPORTS
+    nanosleep
+    clock_getres
+    clock_gettime
+    clock_settime
+    clock_nanosleep
+
+    sched_get_priority_max
+    sched_get_priority_min
+    sched_getparam
+    sched_getscheduler
+    sched_rr_get_interval
+    sched_setparam
+    sched_setscheduler
+    sched_yield
+
+    sem_init
+    sem_destroy
+    sem_trywait
+    sem_timedwait
+    sem_wait
+    sem_post
+    sem_open
+    sem_close
+    sem_unlink
+
     ;pthread_create
+    ;pthread_once
     ;pthread_exit
     ;pthread_self
     ;pthread_equal
@@ -32,21 +58,25 @@ EXPORTS
     ;pthread_mutex_lock
     ;pthread_mutex_unlock
 
-    sched_get_priority_max
-    sched_get_priority_min
-    sched_getparam
-    sched_getscheduler
-    sched_rr_get_interval
-    sched_setparam
-    sched_setscheduler
-    sched_yield
+    ;pthread_spin_destroy
+    ;pthread_spin_init
+    ;pthread_spin_lock
+    ;pthread_spin_trylock
+    ;pthread_spin_unlock
 
-    sem_init
-    sem_destroy
-    sem_trywait
-    sem_timedwait
-    sem_wait
-    sem_post
-    sem_open
-    sem_close
-    sem_unlink
+    ;pthread_cond_init
+    ;pthread_cond_signal
+    ;pthread_cond_broadcast
+    ;pthread_cond_wait
+    ;pthread_cond_timedwait
+    ;pthread_cond_destroy
+
+    ;pthread_rwlock_destroy
+    ;pthread_rwlock_init
+    ;pthread_rwlock_rdlock
+    ;pthread_rwlock_timedrdlock
+    ;pthread_rwlock_timedwrlock
+    ;pthread_rwlock_tryrdlock
+    ;pthread_rwlock_trywrlock
+    ;pthread_rwlock_unlock
+    ;pthread_rwlock_wrlock

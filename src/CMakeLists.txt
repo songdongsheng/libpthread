@@ -1,4 +1,5 @@
 ADD_LIBRARY(pthread SHARED libpthread.def version.rc
+        clock.c
         sched.c
         sem.c
         init_shared.c)
@@ -18,6 +19,7 @@ INSTALL(TARGETS pthread
 # Therefore, I do not intend to support static library in the near future.
 #
 #ADD_LIBRARY(pthread_static STATIC
+#        clock.c
 #        sched.c
 #        sem.c
 #        init_static.c)

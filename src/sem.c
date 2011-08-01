@@ -21,12 +21,11 @@ int sem_init(sem_t *sem, int pshared, unsigned int value)
     if (NULL == (pv = (arch_sem_t *)calloc(1, sizeof(arch_sem_t))))
         return set_errno(ENOMEM);
 
-    if ((pv->handle = CreateSemaphore (NULL, 0, value, NULL)) == NULL) {
+    if ((pv->handle = CreateSemaphore (NULL, value, SEM_VALUE_MAX, NULL)) == NULL) {
         free(pv);
         return set_errno(ENOSPC);
     }
 
-    pv->value = value;
     *sem = pv;
     return 0;
 }
@@ -37,9 +36,6 @@ int sem_destroy(sem_t *sem)
 
     if (pv == NULL)
         return set_errno(EINVAL);
-
-    if (pv->value < 0)
-        return set_errno(EBUSY);
 
     if (CloseHandle (pv->handle) == 0)
         return set_errno(EINVAL);
@@ -155,7 +151,7 @@ sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)
         return NULL;
     }
 
-    if ((pv->handle = CreateSemaphore (NULL, 0, value, buffer)) == NULL)
+    if ((pv->handle = CreateSemaphore (NULL, value, SEM_VALUE_MAX, buffer)) == NULL)
     {
         free(pv);
         set_errno(ENOSPC);
