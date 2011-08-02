@@ -113,7 +113,7 @@ sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)
     char buffer[512];
     arch_sem_t *pv;
 
-    if (value > (unsigned int) SEM_VALUE_MAX || (len = strlen(name)) > sizeof(buffer) - 8 || len < 1) {
+    if (value > (unsigned int) SEM_VALUE_MAX || (len = strlen(name)) > (int) sizeof(buffer) - 8 || len < 1) {
         set_errno(EINVAL);
         return NULL;
     }

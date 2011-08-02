@@ -29,8 +29,8 @@ int main(int argc, char *argv[])
 
     tp.tv_sec += 1;
     tp.tv_nsec += 15625000;
-    if (tp.tv_nsec > 999999999) {
-        tp.tv_nsec -= 1000000000;
+    if (tp.tv_nsec >= POW10_9) {
+        tp.tv_nsec -= POW10_9;
         tp.tv_sec += 1;
     }
     rc = sem_timedwait(sem, &tp);

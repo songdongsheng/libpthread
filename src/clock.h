@@ -9,6 +9,30 @@
 extern "C" {
 #endif
 
+#ifndef INT64_C
+#ifdef  _MSC_VER
+#define INT64_C(c)      c ## I64
+#define UINT64_C(c)     c ## UI64
+#else
+#define INT64_C(c)      c ## LL
+#define UINT64_C(c)     c ## ULL
+#endif
+#endif
+
+#ifndef PRId64
+#ifdef  _WIN32
+#define PRId64          "I64d"
+#define PRIu64          "I64u"
+#define PRIx64          "I64x"
+#define PRIX64          "I64X"
+#else
+#define PRId64          "lld"
+#define PRIu64          "llu"
+#define PRIx64          "llx"
+#define PRIX64          "llX"
+#endif
+#endif
+
 #ifndef __clockid_t_defined
 typedef int clockid_t;
 #define __clockid_t_defined

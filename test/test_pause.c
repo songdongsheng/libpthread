@@ -22,12 +22,14 @@ int main(int argc, char *argv[])
 {
     test_sync();
 
-/* cpu_relax */
+/* cpu_relax() */
 #ifdef _MSC_VER
     __asm pause
 #else
     asm volatile ( "pause" ::: "memory" );
 #endif
+
+    printf("test_pause passed\n");
 
     return 0;
 }
