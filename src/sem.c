@@ -1,10 +1,10 @@
 #include <errno.h>
 #include <fcntl.h>
+#include <semaphore.h>
 #include <stdlib.h>
 
 #include <winsock2.h>
 
-#include "semaphore.h"
 #include "arch_sem.h"
 #include "misc.h"
 

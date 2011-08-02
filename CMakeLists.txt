@@ -76,8 +76,11 @@ ENDIF()
 INCLUDE_DIRECTORIES ("${PROJECT_SOURCE_DIR}/include")
 
 # CMAKE_INSTALL_PREFIX
-INSTALL (FILES "${PROJECT_SOURCE_DIR}/include/sched.h"      DESTINATION include)
-INSTALL (FILES "${PROJECT_SOURCE_DIR}/include/semaphore.h"  DESTINATION include)
+INSTALL (FILES "${PROJECT_SOURCE_DIR}/include/pthread.h"        DESTINATION include)
+INSTALL (FILES "${PROJECT_SOURCE_DIR}/include/pthread_clock.h"  DESTINATION include)
+INSTALL (FILES "${PROJECT_SOURCE_DIR}/include/pthread_types.h"  DESTINATION include)
+INSTALL (FILES "${PROJECT_SOURCE_DIR}/include/sched.h"          DESTINATION include)
+INSTALL (FILES "${PROJECT_SOURCE_DIR}/include/semaphore.h"      DESTINATION include)
 
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(test)

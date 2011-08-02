@@ -24,9 +24,9 @@ EXPORTS
     sem_close
     sem_unlink
 
-    ;pthread_create
+    pthread_create
     ;pthread_once
-    ;pthread_exit
+    pthread_exit
     ;pthread_self
     ;pthread_equal
     ;pthread_detach
@@ -41,22 +41,24 @@ EXPORTS
     ;pthread_setcanceltype
     ;pthread_testcancel
 
-    ;pthread_attr_init
-    ;pthread_attr_destroy
-    ;pthread_attr_getstacksize
-    ;pthread_attr_setstacksize
-    ;pthread_attr_setdetachstate
-    ;pthread_attr_getdetachstate
+    pthread_attr_init
+    pthread_attr_destroy
+    pthread_attr_getstacksize
+    pthread_attr_setstacksize
+    pthread_attr_setdetachstate
+    pthread_attr_getdetachstate
+    pthread_attr_setinheritsched
+    pthread_attr_getinheritsched
 
-    ;pthread_key_create
-    ;pthread_key_delete
-    ;pthread_setspecific
-    ;pthread_getspecific
+    pthread_key_create
+    pthread_key_delete
+    pthread_setspecific
+    pthread_getspecific
 
-    ;pthread_mutex_destroy
-    ;pthread_mutex_init
-    ;pthread_mutex_lock
-    ;pthread_mutex_unlock
+    pthread_mutex_destroy
+    pthread_mutex_init
+    pthread_mutex_lock
+    pthread_mutex_unlock
 
     ;pthread_spin_destroy
     ;pthread_spin_init

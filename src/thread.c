@@ -1,11 +1,13 @@
-#include <errno.h>
-#include <process.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #include <winsock2.h>
 
 #include "arch_thread.h"
 #include "misc.h"
+
+extern DWORD libpthread_tls_index;
+extern HANDLE libpthread_heap;
 
 void pthread_testcancel(void)
 {
@@ -14,15 +16,11 @@ void pthread_testcancel(void)
 
 int pthread_setcancelstate(int state, int *oldstate)
 {
-    if (oldstate != NULL)
-        *oldstate = PTHREAD_CANCEL_ENABLE;
     return 0;
 }
 
 int pthread_setcanceltype(int type, int *oldtype)
 {
-    if (oldtype != NULL)
-        *oldtype = PTHREAD_CANCEL_DEFERRED;
     return 0;
 }
 
@@ -38,8 +36,9 @@ int pthread_kill(pthread_t thread, int sig)
 
 void pthread_cleanup_push(void (*routine)(void *), void *arg)
 {
-    arch_thread_info *pv = (arch_thread_info *) TlsGetValue(tls_thread_info);
-    arch_thread_cleanup_list *node = (arch_thread_cleanup_list *) HeapAlloc(proc_heap, HEAP_ZERO_MEMORY, sizeof(arch_thread_cleanup_list));
+    arch_thread_cleanup_list *next;
+    arch_thread_info *pv = (arch_thread_info *) TlsGetValue(libpthread_tls_index);
+    arch_thread_cleanup_list *node = (arch_thread_cleanup_list *) HeapAlloc(libpthread_heap, HEAP_ZERO_MEMORY, sizeof(arch_thread_cleanup_list));
 
     node->arg = arg;
     node->cleaner = routine;
@@ -49,7 +48,7 @@ void pthread_cleanup_push(void (*routine)(void *), void *arg)
         return;
     }
 
-    arch_thread_cleanup_list *next = pv->cleanup_list;
+    next = pv->cleanup_list;
     while(next->next != NULL)
         next = next->next;
 
@@ -59,7 +58,7 @@ void pthread_cleanup_push(void (*routine)(void *), void *arg)
 
 void pthread_cleanup_pop(int execute)
 {
-    arch_thread_info *pv = (arch_thread_info *) TlsGetValue(tls_thread_info);
+    arch_thread_info *pv = (arch_thread_info *) TlsGetValue(libpthread_tls_index);
     arch_thread_cleanup_list *node = pv->cleanup_list, *prev;
 
     if (node == NULL) return;
@@ -71,7 +70,7 @@ void pthread_cleanup_pop(int execute)
     }
 
     prev = node->prev;
-    HeapFree(proc_heap, 0, node);
+    HeapFree(libpthread_heap, 0, node);
     if(prev == NULL)
         pv->cleanup_list = NULL;
     else
@@ -82,7 +81,7 @@ unsigned int __stdcall worker_proxy (void *arg)
 {
     arch_thread_info *pv = (arch_thread_info *) arg;
 
-    TlsSetValue(tls_thread_info, pv);
+    TlsSetValue(libpthread_tls_index, pv);
 
     pv->return_value = pv->worker(pv->arg);
 
@@ -96,7 +95,7 @@ unsigned int __stdcall worker_proxy (void *arg)
              *
              * node->cleaner(node->arg);
              */
-            HeapFree(proc_heap, 0, node);
+            HeapFree(libpthread_heap, 0, node);
             node = next;
         } while(node != NULL);
         pv->cleanup_list = NULL;
@@ -105,8 +104,8 @@ unsigned int __stdcall worker_proxy (void *arg)
     /* Make sure we free ourselves if we are detached */
     if ((pv->state & PTHREAD_CREATE_DETACHED) == PTHREAD_CREATE_DETACHED) {
         CloseHandle (pv->handle);
-        HeapFree(proc_heap, 0, pv);
-        TlsSetValue(tls_thread_info, NULL);
+        HeapFree(libpthread_heap, 0, pv);
+        TlsSetValue(libpthread_tls_index, NULL);
     }
 
     return 0;
@@ -114,7 +113,7 @@ unsigned int __stdcall worker_proxy (void *arg)
 
 int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine)(void *), void *arg)
 {
-    arch_thread_info *pv = (arch_thread_info *) HeapAlloc(proc_heap, HEAP_ZERO_MEMORY, sizeof(arch_thread_info));
+    arch_thread_info *pv = (arch_thread_info *) HeapAlloc(libpthread_heap, HEAP_ZERO_MEMORY, sizeof(arch_thread_info));
     if (pv == NULL)
         return set_errno(ENOMEM);
 
@@ -125,7 +124,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_
     pv->handle = (HANDLE) _beginthreadex(NULL, 0, worker_proxy, pv, CREATE_SUSPENDED, NULL);
 
     if (pv->handle == INVALID_HANDLE_VALUE) {
-        HeapFree(proc_heap, 0, pv);
+        HeapFree(libpthread_heap, 0, pv);
         return errno;
     }
 
@@ -141,7 +140,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_
 
 void pthread_exit(void *value_ptr)
 {
-    arch_thread_info *pv = (arch_thread_info *) TlsGetValue(tls_thread_info);
+    arch_thread_info *pv = (arch_thread_info *) TlsGetValue(libpthread_tls_index);
     pv->return_value = value_ptr;
 
     /* Call clean-up handlers, and free memory */
@@ -152,7 +151,7 @@ void pthread_exit(void *value_ptr)
         do {
             arch_thread_cleanup_list *prev = node->prev;
             node->cleaner(node->arg);
-            HeapFree(proc_heap, 0, node);
+            HeapFree(libpthread_heap, 0, node);
             node = prev;
         } while(node != NULL);
         pv->cleanup_list = NULL;
@@ -161,8 +160,8 @@ void pthread_exit(void *value_ptr)
     /* Make sure we free ourselves if we are detached */
     if ((pv->state & PTHREAD_CREATE_DETACHED) == PTHREAD_CREATE_DETACHED) {
         CloseHandle (pv->handle);
-        HeapFree(proc_heap, 0, pv);
-        TlsSetValue(tls_thread_info, NULL);
+        HeapFree(libpthread_heap, 0, pv);
+        TlsSetValue(libpthread_tls_index, NULL);
     }
 
     _endthreadex(0);
@@ -185,7 +184,7 @@ int pthread_detach (pthread_t t)
 
 pthread_t pthread_self(void)
 {
-    return (pthread_t) TlsGetValue(tls_thread_info);
+    return (pthread_t) TlsGetValue(libpthread_tls_index);
 }
 
 int pthread_equal(pthread_t t1, pthread_t t2)

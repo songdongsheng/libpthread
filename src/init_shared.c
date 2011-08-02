@@ -1,5 +1,6 @@
 #include <winsock2.h>
 
+HANDLE libpthread_heap;
 DWORD libpthread_tls_index;
 DWORD libpthread_time_increment;
 __int64 libpthread_hpet_frequency;
@@ -14,6 +15,9 @@ static BOOL libpthread_init(void) {
     BOOL    isTimeAdjustmentDisabled;
 
     LARGE_INTEGER pf;
+
+    if ((libpthread_heap = GetProcessHeap()) == NULL)
+        return FALSE;
 
     if ((libpthread_tls_index = TlsAlloc()) == TLS_OUT_OF_INDEXES)
         return FALSE;

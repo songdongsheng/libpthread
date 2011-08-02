@@ -1,13 +1,20 @@
 ADD_LIBRARY (${LIBPTHREAD_NAME} SHARED libpthread.def version.rc
         clock.c
+        mutex.c
         sched.c
         sem.c
+        thread.c
+        thread_attr.c
+        tls.c
         init_shared.c)
 SET_TARGET_PROPERTIES (${LIBPTHREAD_NAME} PROPERTIES VERSION 0.1)
 
 IF (CMAKE_COMPILER_IS_GNUCC AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     TARGET_LINK_LIBRARIES(${LIBPTHREAD_NAME} gcov)
 ENDIF()
+
+ADD_CUSTOM_COMMAND(TARGET ${LIBPTHREAD_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/src/libpthread.dll ${PROJECT_BINARY_DIR}/test/libpthread.dll)
 
 INSTALL (TARGETS ${LIBPTHREAD_NAME}
         RUNTIME DESTINATION bin
@@ -22,6 +29,7 @@ INSTALL (TARGETS ${LIBPTHREAD_NAME}
 #        clock.c
 #        sched.c
 #        sem.c
+#        thread.c
 #        init_static.c)
 #SET_TARGET_PROPERTIES (pthread_static PROPERTIES OUTPUT_NAME "pthread")
 #INSTALL (TARGETS pthread_static

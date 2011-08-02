@@ -1,8 +1,10 @@
 #include <assert.h>
 #include <errno.h>
+#include <pthread_clock.h>
 #include <stdio.h>
 
-#include "../src/clock.h"
+#include <winsock2.h>
+
 #include "../src/misc.h"
 
 int main(int argc, char *argv[])

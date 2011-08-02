@@ -1,8 +1,7 @@
-#include <errno.h>
+#include <pthread_clock.h>
 
 #include <winsock2.h>
 
-#include "clock.h"
 #include "misc.h"
 
 extern DWORD libpthread_time_increment;

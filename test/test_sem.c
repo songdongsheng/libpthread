@@ -1,9 +1,10 @@
 #include <assert.h>
-#include <errno.h>
 #include <fcntl.h>
+#include <semaphore.h>
 #include <stdio.h>
 
-#include "semaphore.h"
+#include <winsock2.h>
+
 #include "../src/misc.h"
 
 int main(int argc, char *argv[])

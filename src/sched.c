@@ -1,6 +1,6 @@
-#include <winsock2.h>
+#include <sched.h>
 
-#include "sched.h"
+#include <winsock2.h>
 
 /*
  *  Windows Scheduling Priorities
