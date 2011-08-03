@@ -17,26 +17,34 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <time.h>
+#include <stdlib.h>
+#include <pthread.h>
 
-int main(int argc, char *argv[])
+#include <winsock2.h>
+
+#include "arch_thread.h"
+#include "misc.h"
+
+/*
+ * thread-specific data = TSD
+ * thread local storage = TLS
+ */
+int pthread_key_create(pthread_key_t *key, void (* dest)(void *))
 {
-    __int64 x = (__int64) time(NULL);
+    return set_errno(ENOTSUP);
+}
 
-    x *= 1000;
+int pthread_key_delete(pthread_key_t key)
+{
+    return set_errno(ENOTSUP);
+}
 
-    printf("ms: %I64d\n", x);
-    printf("ms: %I64u\n", x);
-    printf("ms: %I64x\n", x);
-    printf("ms: %I64X\n", x);
+void *pthread_getspecific(pthread_key_t key)
+{
+    return NULL;
+}
 
-#if _MSC_VER >= 1500
-    printf("ms: %lld\n", x);
-    printf("ms: %llu\n", x);
-    printf("ms: %llx\n", x);
-    printf("ms: %llX\n", x);
-#endif
-
-    return 0;
+int pthread_setspecific(pthread_key_t key, const void *value)
+{
+    return set_errno(ENOTSUP);
 }

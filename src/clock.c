@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2011, Dongsheng Song <songdongsheng@live.cn>
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <pthread_clock.h>
 
 #include <winsock2.h>
@@ -7,13 +26,13 @@
 extern DWORD libpthread_time_increment;
 extern __int64 libpthread_hpet_frequency;
 
-int clock_getres(clockid_t clk_id, struct timespec *res)
+int clock_getres(clockid_t clock_id, struct timespec *res)
 {
-    if (clk_id == CLOCK_REALTIME) {
+    if (clock_id == CLOCK_REALTIME) {
         res->tv_sec = libpthread_time_increment / POW10_7;
         res->tv_nsec = ((int)(libpthread_time_increment % POW10_7)) * POW10_2;
         return 0;
-    } else if (clk_id == CLOCK_MONOTONIC) {
+    } else if (clock_id == CLOCK_MONOTONIC) {
         if (libpthread_hpet_frequency < 1000)
             return set_errno(EINVAL);
 
@@ -21,6 +40,36 @@ int clock_getres(clockid_t clk_id, struct timespec *res)
         res->tv_nsec = (int) ((POW10_9 + (libpthread_hpet_frequency >> 1)) / libpthread_hpet_frequency);
         if (res->tv_nsec < 1)
             res->tv_nsec = 1;
+
+        return 0;
+    }
+
+    return set_errno(EINVAL);
+}
+
+int clock_gettime(clockid_t clock_id, struct timespec *tp)
+{
+    __int64 t;
+
+    if (clock_id == CLOCK_REALTIME) {
+        FILETIME ft;
+        GetSystemTimeAsFileTime(&ft);
+        t = (((__int64) ft.dwHighDateTime) << 32 | ft.dwLowDateTime) - DELTA_EPOCH_IN_100NS;
+        tp->tv_sec = t / POW10_7;
+        tp->tv_nsec = ((int) (t % POW10_7)) * 100;
+        return 0;
+    } else if (clock_id == CLOCK_MONOTONIC) {
+        LARGE_INTEGER performanceCount;
+
+        if (libpthread_hpet_frequency < 1000 || QueryPerformanceCounter(&performanceCount) == 0)
+            return set_errno(EINVAL);
+
+        tp->tv_sec = performanceCount.QuadPart / libpthread_hpet_frequency;
+        tp->tv_nsec = (int) ((performanceCount.QuadPart % libpthread_hpet_frequency + (libpthread_hpet_frequency >> 1)) * POW10_9 / libpthread_hpet_frequency);
+        if (tp->tv_nsec >= POW10_9) {
+            tp->tv_sec ++;
+            tp->tv_nsec -= POW10_9;
+        }
 
         return 0;
     }
@@ -50,7 +99,7 @@ int clock_nanosleep(clockid_t clock_id, int flags,
                            const struct timespec *request,
                            struct timespec *remain)
 {
-    if (clock_id != 0)
+    if (clock_id != CLOCK_REALTIME)
         return set_errno(EINVAL);
 
     if (flags == 0)
@@ -62,43 +111,13 @@ int clock_nanosleep(clockid_t clock_id, int flags,
     return 0;
 }
 
-int clock_gettime(clockid_t clk_id, struct timespec *tp)
-{
-    __int64 t;
-
-    if (clk_id == CLOCK_REALTIME) {
-        FILETIME ft;
-        GetSystemTimeAsFileTime(&ft);
-        t = (((__int64) ft.dwHighDateTime) << 32 | ft.dwLowDateTime) - DELTA_EPOCH_IN_100NS;
-        tp->tv_sec = t / POW10_7;
-        tp->tv_nsec = ((int) (t % POW10_7)) * 100;
-        return 0;
-    } else if (clk_id == CLOCK_MONOTONIC) {
-        LARGE_INTEGER performanceCount;
-
-        if (libpthread_hpet_frequency < 1000 || QueryPerformanceCounter(&performanceCount) == 0)
-            return set_errno(EINVAL);
-
-        tp->tv_sec = performanceCount.QuadPart / libpthread_hpet_frequency;
-        tp->tv_nsec = (int) ((performanceCount.QuadPart % libpthread_hpet_frequency + (libpthread_hpet_frequency >> 1)) * POW10_9 / libpthread_hpet_frequency);
-        if (tp->tv_nsec >= POW10_9) {
-            tp->tv_sec ++;
-            tp->tv_nsec -= POW10_9;
-        }
-
-        return 0;
-    }
-
-    return set_errno(EINVAL);
-}
-
-int clock_settime(clockid_t clk_id, const struct timespec *tp)
+int clock_settime(clockid_t clock_id, const struct timespec *tp)
 {
     unsigned __int64 t64;
     FILETIME ft;
     SYSTEMTIME st;
 
-    if (clk_id != CLOCK_REALTIME)
+    if (clock_id != CLOCK_REALTIME)
         return set_errno(EINVAL);
 
     t64 = tp->tv_sec * POW10_7 + tp->tv_nsec / 100 + DELTA_EPOCH_IN_100NS;

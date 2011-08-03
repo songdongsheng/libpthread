@@ -1,4 +1,4 @@
-**Another posix thread library for windows**
+**POSIX thread library for windows**
 
 # Introduction #
 Another posix thread library for windows XP/2003 or later.
@@ -12,3 +12,14 @@ Another posix thread library for windows XP/2003 or later.
 # Source #
   * Web View: http://github.com/songdongsheng/libpthread
   * git clone git://github.com/songdongsheng/libpthread.git
+
+or
+
+  * Web View: http://code.google.com/p/libpthread/source/browse/
+  * git clone https://code.google.com/p/libpthread
+
+# Requirements #
+Following programs are requred to build:
+  - MinGW-w64 gcc 4.6 or later
+    Microsoft C/C++ Compiler 2008 or later
+  - CMake 2.8 or later

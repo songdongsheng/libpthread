@@ -5,9 +5,9 @@ ADD_LIBRARY (${LIBPTHREAD_NAME} SHARED libpthread.def version.rc
         sem.c
         thread.c
         thread_attr.c
-        tls.c
+        tsd.c
         init_shared.c)
-SET_TARGET_PROPERTIES (${LIBPTHREAD_NAME} PROPERTIES VERSION 0.1)
+SET_TARGET_PROPERTIES (${LIBPTHREAD_NAME} PROPERTIES VERSION ${libpthread_VERSION_MAJOR}.${libpthread_VERSION_MINOR})
 
 IF (CMAKE_COMPILER_IS_GNUCC AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     TARGET_LINK_LIBRARIES(${LIBPTHREAD_NAME} gcov)
