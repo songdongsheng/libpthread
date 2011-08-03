@@ -27,19 +27,19 @@ EXPORTS
     pthread_create
     ;pthread_once
     pthread_exit
-    ;pthread_self
-    ;pthread_equal
-    ;pthread_detach
-    ;pthread_join
+    pthread_self
+    pthread_equal
+    pthread_detach
+    pthread_join
 
-    ;pthread_cleanup_push
-    ;pthread_cleanup_pop
+    pthread_cleanup_push
+    pthread_cleanup_pop
 
-    ;pthread_cancel
-    ;pthread_kill
-    ;pthread_setcancelstate
-    ;pthread_setcanceltype
-    ;pthread_testcancel
+    pthread_cancel
+    pthread_kill
+    pthread_setcancelstate
+    pthread_setcanceltype
+    pthread_testcancel
 
     pthread_attr_init
     pthread_attr_destroy

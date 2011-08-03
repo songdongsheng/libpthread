@@ -50,7 +50,7 @@ int pthread_cancel(pthread_t thread)
 
 int pthread_kill(pthread_t thread, int sig)
 {
-    return pthread_cancel(thread);
+    return 0;
 }
 
 void pthread_cleanup_push(void (*routine)(void *), void *arg)
