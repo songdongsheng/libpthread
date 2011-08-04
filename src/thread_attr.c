@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>
 #include <pthread.h>
+#include <stdio.h>
 
 #include <winsock2.h>
 

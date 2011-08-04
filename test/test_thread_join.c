@@ -17,10 +17,10 @@
  * limitations under the License.
  */
 
-#include <assert.h>
 #include <pthread.h>
 #include <pthread_clock.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <winsock2.h>
 
@@ -44,6 +44,8 @@ int main(int argc, char *argv[])
         was_changed = 0;
         rc = pthread_create(&t, NULL, wroker, NULL);
         assert(rc == 0);
+
+        /* printf("[%03d] rc: %d, t: %p\n", i, rc, t); */
 
         rc = pthread_join(t, &result);
         assert(rc == 0);

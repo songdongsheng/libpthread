@@ -17,9 +17,8 @@
  * limitations under the License.
  */
 
-#include <errno.h>
-#include <fcntl.h>
 #include <semaphore.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include <winsock2.h>

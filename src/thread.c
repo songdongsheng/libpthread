@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>
 #include <pthread.h>
+#include <stdio.h>
 
 #include <winsock2.h>
 
@@ -153,7 +153,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_
       CloseHandle(pv->handle);
 
     ResumeThread(pv->handle);
-    thread = (pthread_t *)pv;
+    *thread = (pthread_t) pv;
     return 0;
 }
 

@@ -20,8 +20,6 @@
 #ifndef _MISC_H_
 #define _MISC_H_    1
 
-#include <pthread_types.h>
-
 /* Number of 100ns-seconds between the beginning of the Windows epoch
  * (Jan. 1, 1601) and the Unix epoch (Jan. 1, 1970)
  */
@@ -36,6 +34,14 @@
 #define POW10_6     INT64_C(1000000)
 #define POW10_7     INT64_C(10000000)
 #define POW10_9     INT64_C(1000000000)
+
+static __inline void _my_assert(char *message, char *file, unsigned int line)
+{
+    fprintf(stderr, "Assertion failed: %s , file %s, line %u\n", message, file, line);
+    exit(1);
+}
+
+#define assert(_Expression) (void)( (!!(_Expression)) || (_my_assert(#_Expression, __FILE__, __LINE__), 0) )
 
 static __inline int set_errno(int result)
 {

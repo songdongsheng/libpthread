@@ -17,11 +17,14 @@
  * limitations under the License.
  */
 
-#include <assert.h>
+#include <sched.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
 #include <winsock2.h>
-#include "sched.h"
+
+#include "../src/misc.h"
 
 int main(int argc, char *argv[])
 {

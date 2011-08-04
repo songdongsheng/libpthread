@@ -17,10 +17,9 @@
  * limitations under the License.
  */
 
-#include <assert.h>
-#include <errno.h>
 #include <pthread_clock.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <winsock2.h>
 

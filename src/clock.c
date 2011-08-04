@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+#include <stdio.h>
 #include <pthread_clock.h>
 
 #include <winsock2.h>

@@ -21,6 +21,7 @@
 #define _PTHREAD_TYPES_H_   1
 
 #include <errno.h> /* Adding definition of EINVAL, ETIMEDOUT, ..., etc. */
+#include <fcntl.h> /* Adding O_CREAT definition. */
 #include <limits.h> /* Adding INT_MAX, UINT_MAX definition.*/
 #include <process.h> /* Adding intptr_t, uintptr_t definition.*/
 #include <time.h> /* Adding time_t definition.  */

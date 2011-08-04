@@ -17,10 +17,10 @@
  * limitations under the License.
  */
 
-#include <assert.h>
 #include <pthread.h>
 #include <pthread_clock.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <winsock2.h>
 
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     assert(rc == 0);
 
     while (i++ < 120) {
-        if (was_changed != 1) break;
+        if (was_changed != 0) break;
         nanosleep(&request, NULL);
     }
 
