@@ -19,49 +19,36 @@
 
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <winsock2.h>
 
-#include "arch_thread.h"
-#include "misc.h"
+#include "../src/misc.h"
 
-/*
- * thread-specific data = TSD
- * thread local storage = TLS
- */
-
-extern HANDLE libpthread_heap;
-
-int pthread_key_create(pthread_key_t *key, void (* dest)(void *))
+int main(int argc, char *argv[])
 {
-    if ((*key = TlsAlloc()) == TLS_OUT_OF_INDEXES)
-        return set_errno(EAGAIN);
+    int rc;
+    char *pc;
+    char buf[4] = { 17, 18, 'U', 'p' };
+    pthread_key_t key = 0;
 
-    return 0;
-}
+    rc = pthread_key_create(&key, NULL);
+    assert(rc == 0);
+    printf("pthread_key_create passed (%u)\n", key);
 
-int pthread_key_delete(pthread_key_t key)
-{
-    if (TlsFree(key) == 0)
-        return set_errno(EINVAL);
+    rc = pthread_setspecific(key, buf);
+    assert(rc == 0);
+    printf("pthread_setspecific passed\n");
 
-    return 0;
-}
+    pc = pthread_getspecific(key);
+    assert(pc != NULL);
+    for(rc = 0; rc < 4; rc ++)
+        assert(pc[rc] == buf[rc]);
+    printf("pthread_getspecific passed\n");
 
-void *pthread_getspecific(pthread_key_t key)
-{
-    void *rp = TlsGetValue(key);
-
-    if ((rp == NULL) && (GetLastError() != ERROR_SUCCESS))
-        set_errno(EINVAL);
-
-    return rp;
-}
-
-int pthread_setspecific(pthread_key_t key, const void *value)
-{
-    if (TlsSetValue(key, (LPVOID) value) == 0)
-        return set_errno(EINVAL);
+    rc = pthread_key_delete(key);
+    assert(rc == 0);
+    printf("pthread_key_delete passed\n");
 
     return 0;
 }

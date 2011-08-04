@@ -17,51 +17,20 @@
  * limitations under the License.
  */
 
-#include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <winsock2.h>
 
-#include "arch_thread.h"
-#include "misc.h"
-
-/*
- * thread-specific data = TSD
- * thread local storage = TLS
- */
-
-extern HANDLE libpthread_heap;
-
-int pthread_key_create(pthread_key_t *key, void (* dest)(void *))
+int main(int argc, char *argv[])
 {
-    if ((*key = TlsAlloc()) == TLS_OUT_OF_INDEXES)
-        return set_errno(EAGAIN);
+    SRWLOCK rw; /* InitializeSRWLock */
+    CONDITION_VARIABLE cv; /* InitializeConditionVariable */
+    CRITICAL_SECTION cs; /* InitializeCriticalSectionAndSpinCount */
 
-    return 0;
-}
-
-int pthread_key_delete(pthread_key_t key)
-{
-    if (TlsFree(key) == 0)
-        return set_errno(EINVAL);
-
-    return 0;
-}
-
-void *pthread_getspecific(pthread_key_t key)
-{
-    void *rp = TlsGetValue(key);
-
-    if ((rp == NULL) && (GetLastError() != ERROR_SUCCESS))
-        set_errno(EINVAL);
-
-    return rp;
-}
-
-int pthread_setspecific(pthread_key_t key, const void *value)
-{
-    if (TlsSetValue(key, (LPVOID) value) == 0)
-        return set_errno(EINVAL);
+    printf("sizeof(CRITICAL_SECTION): %u\n", sizeof(CRITICAL_SECTION));
+    printf("sizeof(SRWLOCK): %u\n", sizeof(SRWLOCK));
+    printf("sizeof(CONDITION_VARIABLE): %u\n", sizeof(CONDITION_VARIABLE));
 
     return 0;
 }

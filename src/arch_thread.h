@@ -33,8 +33,29 @@ typedef struct {
     void *(* worker)(void *);
     void *arg;
     void *return_value;
-    volatile unsigned int state;
+    unsigned int state;
     arch_thread_cleanup_list *cleanup_list;
 } arch_thread_info;
+
+typedef struct {
+    unsigned int state;
+    unsigned int stack_size;
+    int priority;
+} arch_thread_attr;
+
+/* sizeof(CRITICAL_SECTION): 24 */
+typedef struct {
+    char mutex[24];
+} arch_thread_mutex;
+
+/* sizeof(SRWLOCK): 4 */
+typedef struct {
+    char rwlock[8]; /* InitializeSRWLock */
+} arch_thread_rwlock;
+
+/* sizeof(CONDITION_VARIABLE): 4 */
+typedef struct {
+    char cond[8]; /* InitializeConditionVariable */
+} arch_thread_cond;
 
 #endif
