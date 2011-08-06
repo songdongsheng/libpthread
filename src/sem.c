@@ -23,7 +23,7 @@
 
 #include <winsock2.h>
 
-#include "arch_sem.h"
+#include "arch.h"
 #include "misc.h"
 
 int sem_init(sem_t *sem, int pshared, unsigned int value)

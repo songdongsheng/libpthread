@@ -22,7 +22,7 @@
 
 #include <winsock2.h>
 
-#include "arch_thread.h"
+#include "arch.h"
 #include "misc.h"
 
 int pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a)

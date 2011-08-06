@@ -22,7 +22,7 @@
 
 #include <winsock2.h>
 
-#include "arch_thread.h"
+#include "arch.h"
 #include "misc.h"
 
 extern DWORD libpthread_tls_index;

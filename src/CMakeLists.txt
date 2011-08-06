@@ -1,11 +1,11 @@
 ADD_LIBRARY (${LIBPTHREAD_NAME} SHARED libpthread.def version.rc
+        attr.c
         clock.c
+        key.c
         mutex.c
+        pthread.c
         sched.c
         sem.c
-        thread.c
-        thread_attr.c
-        tsd.c
         init_shared.c)
 SET_TARGET_PROPERTIES (${LIBPTHREAD_NAME} PROPERTIES VERSION ${libpthread_VERSION_MAJOR}.${libpthread_VERSION_MINOR})
 

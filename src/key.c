@@ -22,11 +22,11 @@
 
 #include <winsock2.h>
 
-#include "arch_thread.h"
+#include "arch.h"
 #include "misc.h"
 
 /*
- * thread-specific data = TSD
+ * thread specific data = TSD
  * thread local storage = TLS
  */
 

@@ -20,6 +20,13 @@
 #ifndef _ARCH_THREAD_H_
 #define _ARCH_THREAD_H_ 1
 
+#include <winsock2.h>
+
+typedef struct
+{
+    HANDLE handle;
+} arch_sem_t;
+
 struct arch_thread_cleanup_node {
     void (* cleaner)(void *);
     void *arg;

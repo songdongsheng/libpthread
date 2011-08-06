@@ -17,14 +17,50 @@
  * limitations under the License.
  */
 
-#ifndef _ARCH_SEM_H_
-#define _ARCH_SEM_H_    1
+#include <pthread.h>
+#include <stdio.h>
 
 #include <winsock2.h>
 
-typedef struct
-{
-    HANDLE handle;
-} arch_sem_t;
+#include "arch.h"
+#include "misc.h"
 
-#endif
+int pthread_attr_init(pthread_attr_t *attr)
+{
+    return set_errno(ENOTSUP);
+}
+
+int pthread_attr_destroy(pthread_attr_t *attr)
+{
+    return set_errno(ENOTSUP);
+}
+
+int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *size)
+{
+    return set_errno(ENOTSUP);
+}
+
+int pthread_attr_setstacksize(pthread_attr_t *attr, size_t size)
+{
+    return set_errno(ENOTSUP);
+}
+
+int pthread_attr_setdetachstate(pthread_attr_t *a, int flag)
+{
+    return set_errno(ENOTSUP);
+}
+
+int pthread_attr_getdetachstate(const pthread_attr_t *a, int *flag)
+{
+    return set_errno(ENOTSUP);
+}
+
+int pthread_attr_setinheritsched(pthread_attr_t *a, int flag)
+{
+    return set_errno(ENOTSUP);
+}
+
+int pthread_attr_getinheritsched(const pthread_attr_t *a, int *flag)
+{
+    return set_errno(ENOTSUP);
+}
