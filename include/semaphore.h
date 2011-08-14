@@ -29,8 +29,8 @@ extern "C" {
 typedef void    *sem_t;
 
 #ifndef PTHREAD_PROCESS_SHARED
-    #define PTHREAD_PROCESS_SHARED      0
-    #define PTHREAD_PROCESS_PRIVATE     1
+    #define PTHREAD_PROCESS_PRIVATE     0
+    #define PTHREAD_PROCESS_SHARED      1
 #endif
 
 #define SEM_VALUE_MAX   INT_MAX

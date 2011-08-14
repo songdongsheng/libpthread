@@ -37,8 +37,8 @@ extern "C" {
 #define PTHREAD_ONCE_INIT           0
 
 #define PTHREAD_MUTEX_NORMAL        0
-#define PTHREAD_MUTEX_ERRORCHECK    1
-#define PTHREAD_MUTEX_RECURSIVE     2
+#define PTHREAD_MUTEX_RECURSIVE     1
+#define PTHREAD_MUTEX_ERRORCHECK    2
 #define PTHREAD_MUTEX_DEFAULT       PTHREAD_MUTEX_NORMAL
 #define PTHREAD_MUTEX_INITIALIZER   NULL
 
@@ -46,7 +46,7 @@ typedef uintptr_t pthread_t;
 typedef void    *pthread_attr_t;
 
 typedef int pthread_once_t;
-typedef unsigned pthread_key_t;
+typedef unsigned int pthread_key_t;
 
 typedef void    *pthread_spinlock_t;
 
@@ -61,6 +61,10 @@ typedef void    *pthread_condattr_t;
 
 typedef void    *pthread_rwlock_t;
 typedef void    *pthread_rwlockattr_t;
+
+#define PTHREAD_MUTEX_INITIALIZER   NULL
+#define PTHREAD_RWLOCK_INITIALIZER  NULL
+#define PTHREAD_COND_INITIALIZER    NULL
 
 int pthread_create(pthread_t *th, const pthread_attr_t *attr, void *(* func)(void *), void *arg);
 int pthread_join(pthread_t t, void **res);

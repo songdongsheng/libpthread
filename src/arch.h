@@ -52,7 +52,7 @@ typedef struct {
 
 /* sizeof(CRITICAL_SECTION): 24 */
 typedef struct {
-    char mutex[24];
+    CRITICAL_SECTION mutex;
 } arch_thread_mutex;
 
 /* sizeof(SRWLOCK): 4 */

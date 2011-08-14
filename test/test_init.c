@@ -20,14 +20,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void __cdecl libpthread_fini(void) {
+void libpthread_fini(void) {
     printf("libpthread_fini\n");
 }
 
 #if defined(__GNUC__)
 __attribute__((constructor))
 #endif
-int __cdecl libpthread_init(void) {
+int libpthread_init(void) {
     printf("libpthread_init\n");
     atexit(libpthread_fini);
     return 0;

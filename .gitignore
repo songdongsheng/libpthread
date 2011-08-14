@@ -13,6 +13,7 @@
 *~
 *.a
 *.bz2
+*.cmake
 *.dll
 *.exe
 *.gz
@@ -26,6 +27,14 @@
 *.s
 *.so
 *.xz
+
+#
+# CMake generated files
+#
+Makefile
+CMakeCache.txt
+DartConfiguration.tcl
+CMakeFiles/
 
 #
 # Top-level generic files
