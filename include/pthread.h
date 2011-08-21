@@ -43,24 +43,23 @@ extern "C" {
 #define PTHREAD_MUTEX_INITIALIZER   NULL
 
 typedef uintptr_t pthread_t;
-typedef void    *pthread_attr_t;
+typedef void *pthread_attr_t;
 
-typedef int pthread_once_t;
-typedef unsigned int pthread_key_t;
+typedef unsigned long pthread_once_t;
+typedef unsigned long pthread_key_t;
 
-typedef void    *pthread_spinlock_t;
+typedef unsigned long pthread_mutexattr_t;
+typedef unsigned long pthread_condattr_t;
+typedef unsigned long pthread_rwlockattr_t;
 
 typedef void    *pthread_mutex_t;
-typedef void    *pthread_mutexattr_t;
+typedef void    *pthread_cond_t;
+typedef void    *pthread_rwlock_t;
 
 typedef void    *pthread_barrier_t;
 typedef void    *pthread_barrierattr_t;
 
-typedef void    *pthread_cond_t;
-typedef void    *pthread_condattr_t;
-
-typedef void    *pthread_rwlock_t;
-typedef void    *pthread_rwlockattr_t;
+typedef void    *pthread_spinlock_t;
 
 #define PTHREAD_MUTEX_INITIALIZER   NULL
 #define PTHREAD_RWLOCK_INITIALIZER  NULL

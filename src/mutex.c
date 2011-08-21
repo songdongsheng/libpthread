@@ -27,20 +27,16 @@
 
 extern HANDLE libpthread_heap;
 
-static void arch_mutex_init(pthread_mutex_t *m)
+static arch_thread_mutex * arch_mutex_init(pthread_mutex_t *m)
 {
     arch_thread_mutex *pv = HeapAlloc(libpthread_heap, HEAP_ZERO_MEMORY | HEAP_GENERATE_EXCEPTIONS, sizeof(arch_thread_mutex));
     InitializeCriticalSection(& pv->mutex);
-    *m = pv;
+    return pv;
 }
 
 int pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a)
 {
-    if (*m == NULL) {
-        fprintf(stderr, "[pthread_mutex_init] enter *m=%p, m=%p\n", *m, m);
-        arch_mutex_init(m);
-        fprintf(stderr, "[pthread_mutex_init] leave *m=%p, m=%p\n", *m, m);
-    }
+    *m = (pthread_mutex_t *) arch_mutex_init(m);
 
     return 0;
 }
@@ -49,7 +45,6 @@ int pthread_mutex_destroy(pthread_mutex_t *m)
 {
     arch_thread_mutex *pv = (arch_thread_mutex *) *m;
     if (pv != NULL) {
-        fprintf(stderr, "[pthread_mutex_destroy] *m=%p, m=%p\n", *m, m);
         DeleteCriticalSection(& pv->mutex);
         HeapFree(libpthread_heap, 0, pv);
     }
@@ -61,12 +56,11 @@ int pthread_mutex_lock(pthread_mutex_t *m)
 {
     arch_thread_mutex *pv;
 
-    if (*m == NULL)
-        arch_mutex_init(m);
+    if (*m == NULL) /* TODO: Lock */
+        *m = (pthread_mutex_t *) arch_mutex_init(m);
 
     pv = (arch_thread_mutex *) *m;
 
-    fprintf(stderr, "[pthread_mutex_lock] *m=%p, m=%p\n", *m, m);
     EnterCriticalSection(& pv->mutex);
     return 0;
 }
@@ -75,12 +69,11 @@ int pthread_mutex_trylock(pthread_mutex_t *m)
 {
     arch_thread_mutex *pv;
 
-    if (*m == NULL)
-        arch_mutex_init(m);
+    if (*m == NULL) /* TODO: Lock */
+        *m = (pthread_mutex_t *) arch_mutex_init(m);
 
     pv = (arch_thread_mutex *) *m;
 
-    fprintf(stderr, "[pthread_mutex_trylock] *m=%p, m=%p\n", *m, m);
     if( 0 != TryEnterCriticalSection(& pv->mutex))
         return 0;
     return set_errno(EBUSY);
@@ -95,7 +88,6 @@ int pthread_mutex_unlock(pthread_mutex_t *m)
 {
     arch_thread_mutex *pv = (arch_thread_mutex *) *m;
     if (pv != NULL) {
-        fprintf(stderr, "[pthread_mutex_unlock] *m=%p, m=%p\n", *m, m);
         LeaveCriticalSection(& pv->mutex);
         return 0;
     }

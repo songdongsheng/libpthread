@@ -25,7 +25,7 @@
 #include <limits.h> /* Adding INT_MAX, UINT_MAX definition.*/
 #include <process.h> /* Adding intptr_t, uintptr_t definition.*/
 #include <time.h> /* Adding time_t definition.  */
-#include <sys/types.h> /* Adding pid_t, mod_t definition.  */
+#include <sys/types.h> /* Adding pid_t, mode_t definition.  */
 
 #ifndef _MSC_VER
     #include <stdint.h>

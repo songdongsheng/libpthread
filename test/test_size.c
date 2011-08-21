@@ -21,6 +21,7 @@
 #include <stdlib.h>
 
 #include <winsock2.h>
+#include <pthread.h>
 
 int main(int argc, char *argv[])
 {
@@ -28,6 +29,13 @@ int main(int argc, char *argv[])
     CONDITION_VARIABLE cv; /* InitializeConditionVariable */
     CRITICAL_SECTION cs; /* InitializeCriticalSectionAndSpinCount */
 
+#ifdef _WIN64
+    printf("On 64-bit OS:\n");
+#else
+    printf("On 32-bit OS:\n");
+#endif
+
+    printf("sizeof(pthread_attr_t): %u\n", sizeof(pthread_attr_t));
     printf("sizeof(CRITICAL_SECTION): %u\n", sizeof(CRITICAL_SECTION));
     printf("sizeof(SRWLOCK): %u\n", sizeof(SRWLOCK));
     printf("sizeof(CONDITION_VARIABLE): %u\n", sizeof(CONDITION_VARIABLE));
