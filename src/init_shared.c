@@ -21,7 +21,7 @@
 
 HANDLE libpthread_heap;
 DWORD libpthread_tls_index;
-DWORD libpthread_time_increment;
+long libpthread_time_increment; /* nanoseconds */
 __int64 libpthread_hpet_frequency;
 
 static BOOL libpthread_fini(void) {
@@ -44,7 +44,7 @@ static BOOL libpthread_init(void) {
     if (GetSystemTimeAdjustment(&timeAdjustment, &timeIncrement, &isTimeAdjustmentDisabled) == 0)
         return FALSE;
 
-    libpthread_time_increment = timeIncrement;
+    libpthread_time_increment = timeIncrement * 100;
 
     if (QueryPerformanceFrequency(&pf) != 0) {
         libpthread_hpet_frequency = pf.QuadPart;

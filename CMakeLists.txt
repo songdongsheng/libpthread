@@ -1,6 +1,7 @@
 #
 # http://www.cmake.org/Wiki/CMake
 # http://www.cmake.org/Wiki/CMake_Useful_Variables
+# http://gcc.gnu.org/onlinedocs/gcc/Option-Summary.html
 # cmake --help
 # cmake --help-command-list
 #
@@ -67,7 +68,7 @@ ELSEIF (CMAKE_COMPILER_IS_GNUCC)
 
     IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
         ADD_DEFINITIONS ("/DLIBPTHREAD_DEBUG")
-        SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra -Wformat-security -fprofile-arcs -ftest-coverage")
+        SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra -Wformat-security --coverage -fstack-protector-all")
         SET (CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} "-Wl,-static")
     ELSE()
         SET (CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT} "-Wl,-static,--strip-all")

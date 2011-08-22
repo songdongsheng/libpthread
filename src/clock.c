@@ -27,6 +27,23 @@
 extern DWORD libpthread_time_increment;
 extern __int64 libpthread_hpet_frequency;
 
+/**
+ * Get the resolution of the specified clock clock_id and
+ * stores it in the struct timespec pointed to by res.
+ * @param  clock_id The clock_id argument is the identifier of the particular
+ *         clock on which to act. libpthread support the following clocks:
+ * <pre>
+ *     CLOCK_REALTIME System-wide real-time clock. Setting this clock
+ *                 requires appropriate privileges.
+ *     CLOCK_MONOTONIC Clock that cannot be set and represents monotonic
+ *                 time since some unspecified starting point.
+ * </pre>
+ * @param  res The pointer to a timespec structure to receive the time
+ *         resolution.
+ * @return If the function succeeds, the return value is 0.
+ *         If the function fails, the return value is -1,
+ *         with errno set to indicate the error.
+ */
 int clock_getres(clockid_t clock_id, struct timespec *res)
 {
     if (clock_id == CLOCK_REALTIME) {
@@ -48,6 +65,22 @@ int clock_getres(clockid_t clock_id, struct timespec *res)
     return set_errno(EINVAL);
 }
 
+/**
+ * Get the time of the specified clock clock_id and stores it in the struct
+ * timespec pointed to by tp.
+ * @param  clock_id The clock_id argument is the identifier of the particular
+ *         clock on which to act. libpthread support the following clocks:
+ * <pre>
+ *     CLOCK_REALTIME System-wide real-time clock. Setting this clock
+ *                 requires appropriate privileges.
+ *     CLOCK_MONOTONIC Clock that cannot be set and represents monotonic
+ *                 time since some unspecified starting point.
+ * </pre>
+ * @param  tp The pointer to a timespec structure to receive the time.
+ * @return If the function succeeds, the return value is 0.
+ *         If the function fails, the return value is -1,
+ *         with errno set to indicate the error.
+ */
 int clock_gettime(clockid_t clock_id, struct timespec *tp)
 {
     __int64 t;
@@ -78,7 +111,15 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
     return set_errno(EINVAL);
 }
 
-/* sleep up to 49.7 days */
+/**
+ * Sleep up to 49.7 days.
+ * @param  request The requested sleep interval.
+ * @param  remain This argument should normally be specified as NULL.
+ *         The current implemention just ignore it.
+ * @return If the function succeeds, the return value is 0.
+ *         If the function fails, the return value is -1,
+ *         with errno set to indicate the error.
+ */
 int nanosleep(const struct timespec *request, struct timespec *remain)
 {
     __int64 i64;
@@ -95,7 +136,17 @@ int nanosleep(const struct timespec *request, struct timespec *remain)
     return 0;
 }
 
-/* sleep up to 49.7 days */
+/**
+ * Sleep up to 49.7 days.
+ * @param  clock_id This argument should always be CLOCK_REALTIME (0).
+ * @param  flags 0 for relative sleep interval, others for absolute waking up.
+ * @param  request The requested sleep interval or absolute waking up time.
+ * @param  remain This argument should normally be specified as NULL.
+ *         The current implemention just ignore it.
+ * @return If the function succeeds, the return value is 0.
+ *         If the function fails, the return value is -1,
+ *         with errno set to indicate the error.
+ */
 int clock_nanosleep(clockid_t clock_id, int flags,
                            const struct timespec *request,
                            struct timespec *remain)
@@ -112,6 +163,14 @@ int clock_nanosleep(clockid_t clock_id, int flags,
     return 0;
 }
 
+/**
+ * Set the time of the specified clock clock_id.
+ * @param  clock_id This argument should always be CLOCK_REALTIME (0).
+ * @param  tp The requested time.
+ * @return If the function succeeds, the return value is 0.
+ *         If the function fails, the return value is -1,
+ *         with errno set to indicate the error.
+ */
 int clock_settime(clockid_t clock_id, const struct timespec *tp)
 {
     unsigned __int64 t64;

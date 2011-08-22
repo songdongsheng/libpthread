@@ -35,6 +35,13 @@ Makefile
 CMakeCache.txt
 DartConfiguration.tcl
 CMakeFiles/
+Testing/
+
+#
+# Doxygen generated files
+#
+doc/html/
+doc/latex/
 
 #
 # Top-level generic files

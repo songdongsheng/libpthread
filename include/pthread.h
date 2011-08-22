@@ -61,23 +61,25 @@ typedef void    *pthread_barrierattr_t;
 
 typedef void    *pthread_spinlock_t;
 
+#define PTHREAD_ONCE_INIT           0
+
 #define PTHREAD_MUTEX_INITIALIZER   NULL
 #define PTHREAD_RWLOCK_INITIALIZER  NULL
 #define PTHREAD_COND_INITIALIZER    NULL
 
-int pthread_create(pthread_t *th, const pthread_attr_t *attr, void *(* func)(void *), void *arg);
-int pthread_join(pthread_t t, void **res);
+int pthread_create(pthread_t *t, const pthread_attr_t *attr, void *(* start_routine)(void *), void *arg);
+int pthread_join(pthread_t t, void **value_ptr);
 int pthread_detach(pthread_t t);
-int pthread_once(pthread_once_t *o, void (*func)(void));
+int pthread_once(pthread_once_t *once_control, void (* init_routine)(void));
 pthread_t pthread_self(void);
 int pthread_equal(pthread_t t1, pthread_t t2);
 void pthread_exit(void *value_ptr);
 int pthread_kill(pthread_t t, int sig);
 
-int pthread_key_create(pthread_key_t *key, void (* dest)(void *));
+int pthread_key_create(pthread_key_t *key, void (* destructor)(void *));
 int pthread_key_delete(pthread_key_t key);
 void *pthread_getspecific(pthread_key_t key);
-int pthread_setspecific(pthread_key_t key, const void *value);
+int pthread_setspecific(pthread_key_t key, const void *pointer);
 
 int pthread_cancel(pthread_t t);
 int pthread_setcancelstate(int state, int *oldstate);
@@ -114,7 +116,6 @@ int pthread_barrier_wait(pthread_barrier_t *b);
 
 int pthread_spin_init(pthread_spinlock_t *l, int pshared);
 int pthread_spin_destroy(pthread_spinlock_t *l);
-/* No-fair spinlock due to lack of knowledge of thread number.  */
 int pthread_spin_lock(pthread_spinlock_t *l);
 int pthread_spin_trylock(pthread_spinlock_t *l);
 int pthread_spin_unlock(pthread_spinlock_t *l);

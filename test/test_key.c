@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 
     rc = pthread_key_create(&key, NULL);
     assert(rc == 0);
-    printf("pthread_key_create passed (%ul)\n", key);
+    printf("pthread_key_create passed (%lu)\n", key);
 
     rc = pthread_setspecific(key, buf);
     assert(rc == 0);

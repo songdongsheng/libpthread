@@ -31,9 +31,10 @@ int main(int argc, char *argv[])
     int rc, priority = SCHED_OTHER;
     struct timespec tp;
     struct sched_param sp;
-    pid_t pid = 1;
+    pid_t pid = 0;
 
     memset(&sp, 0, sizeof(sp));
+    sp.sched_priority = 15;
 
     rc = sched_yield();
     assert(rc == 0);
@@ -61,7 +62,7 @@ int main(int argc, char *argv[])
 
     rc = sched_getparam(pid, &sp);
     assert(rc == 0);
-    assert(sp.sched_priority == 8);
+    assert(sp.sched_priority == 15);
     printf("sched_getparam passed\n");
 
     rc = sched_rr_get_interval(pid, &tp);
