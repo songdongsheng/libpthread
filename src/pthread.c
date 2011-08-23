@@ -233,3 +233,22 @@ int pthread_join(pthread_t thread, void **value_ptr)
 
     return 0;
 }
+
+/**
+ * Once-only initialization.
+ * @param  once_control The control variable which initialized to PTHREAD_ONCE_INIT.
+ * @param  init_routine The initialization code which executed at most once.
+ * @return Always return 0.
+ */
+int pthread_once(pthread_once_t *once_control, void (* init_routine)(void))
+{
+    if (atomic_cmpxchg((long volatile *) once_control, 1, 0) == 0) {
+        init_routine();
+        *(volatile int *) once_control = 2;
+    } else {
+        while(*(volatile int *) once_control != 2)
+            SwitchToThread();
+    }
+
+    return 0;
+}

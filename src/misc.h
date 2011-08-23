@@ -95,4 +95,39 @@ static __inline unsigned arch_rel_time_in_ms(const struct timespec *ts)
     return (unsigned) t;
 }
 
+static __inline void cpu_relax(void)
+{
+#ifdef _MSC_VER
+    __asm rep nop
+#else
+    asm volatile("rep; nop" ::: "memory");
+#endif
+}
+
+/*
+ * http://gcc.gnu.org/onlinedocs/gcc/Machine-Constraints.html
+ * http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html
+ */
+static __inline long atomic_cmpxchg(long volatile *__ptr, long __new, long __old)
+{
+    long prev;
+
+#ifdef _MSC_VER
+__asm {
+    push         ecx
+    push         edx
+    mov          ecx, dword ptr [__ptr]
+    mov          edx, dword ptr [__new]
+    mov          eax, dword ptr [__old]
+    lock cmpxchg dword ptr [ecx], edx
+    mov          dword ptr [prev], eax
+    pop          edx
+    pop          ecx
+}
+#else
+    asm volatile("lock ; cmpxchgl %2, %1" : "=a" (prev), "+m" (*__ptr) : "q" (__new), "0" (__old) : "memory");
+#endif
+
+    return prev;
+}
 #endif

@@ -25,7 +25,7 @@ EXPORTS
     sem_unlink
 
     pthread_create
-    ;pthread_once
+    pthread_once
     pthread_exit
     pthread_self
     pthread_equal
