@@ -28,75 +28,149 @@
 extern DWORD libpthread_tls_index;
 extern HANDLE libpthread_heap;
 
+/**
+ * Create a cancellation point in the calling thread.
+ *
+ * @bug We do not support cancel point (yet).
+ * In addition to return 0, this function does nothing.
+ */
 void pthread_testcancel(void)
 {
     return;
 }
 
+/**
+ * Atomically both sets the calling thread's cancelability state to the
+ * indicated state and, if oldstate is not NULL, returns the previous
+ * cancelability state at the location referenced by oldstate. Legal
+ * values for state are PTHREAD_CANCEL_ENABLE and PTHREAD_CANCEL_DISABLE.
+ *
+ * @param  state The new cancelability state.
+ * @param  oldstate The old cancelability state.
+ * @return Always return 0.
+ *
+ * @bug We do not support cancel point (yet).
+ * In addition to return 0, this function does nothing.
+ */
 int pthread_setcancelstate(int state, int *oldstate)
 {
     return 0;
 }
 
+/**
+ * Atomically both sets the calling thread's cancelability type to the
+ * indicated type and, if oldtype is not NULL, returns the previous
+ * cancelability type at the location referenced by oldtype.  Legal
+ * values for type are PTHREAD_CANCEL_DEFERRED and PTHREAD_CANCEL_ASYNCHRONOUS.
+ *
+ * @param  type The new cancelability type.
+ * @param  oldtype The old cancelability type.
+ * @return Always return 0.
+ *
+ * @bug We do not support cancel point (yet).
+ * In addition to return 0, this function does nothing.
+ */
 int pthread_setcanceltype(int type, int *oldtype)
 {
     return 0;
 }
 
+/**
+ * Cancel execution of a thread.
+ *
+ * @param  thread The thread to be canceled.
+ * @return Always return 0.
+ *
+ * @bug We do not support cancel point (yet).
+ * In addition to return 0, this function does nothing.
+ */
 int pthread_cancel(pthread_t thread)
 {
     return 0;
 }
 
+/**
+ * Send a signal to a specified thread.
+ *
+ * @param  thread The thread to be signaled.
+ * @param  sig The signal to be send.
+ * @return Always return 0.
+ *
+ * @remark Windows don't really well support signals.
+ * In addition to return 0, this function does nothing.
+ */
 int pthread_kill(pthread_t thread, int sig)
 {
     return 0;
 }
 
-void pthread_cleanup_push(void (*routine)(void *), void *arg)
+/**
+ * Add a cleanup function for thread exit.
+ *
+ * @param  cleanup_routine The cleanup routine to be called.
+ * @param  arg The argument of cleanup routine.
+ * @bug The main thread do not support cleanup routines.
+ */
+void pthread_cleanup_push(void (*cleanup_routine)(void *), void *arg)
 {
     arch_thread_cleanup_list *next;
     arch_thread_info *pv = (arch_thread_info *) TlsGetValue(libpthread_tls_index);
-    arch_thread_cleanup_list *node = (arch_thread_cleanup_list *) HeapAlloc(libpthread_heap, HEAP_ZERO_MEMORY, sizeof(arch_thread_cleanup_list));
 
-    node->arg = arg;
-    node->cleaner = routine;
+    if (pv != NULL) {
+        arch_thread_cleanup_list *node = (arch_thread_cleanup_list *) HeapAlloc(libpthread_heap, HEAP_ZERO_MEMORY, sizeof(arch_thread_cleanup_list));
 
-    if (pv->cleanup_list == NULL) {
-        pv->cleanup_list = node;
-        return;
+        node->arg = arg;
+        node->cleaner = cleanup_routine;
+
+        if (pv->cleanup_list == NULL) {
+            pv->cleanup_list = node;
+            return;
+        }
+
+        next = pv->cleanup_list;
+        while(next->next != NULL)
+            next = next->next;
+
+        next->next = node;
+        node->prev = next;
     }
-
-    next = pv->cleanup_list;
-    while(next->next != NULL)
-        next = next->next;
-
-    next->next = node;
-    node->prev = next;
 }
 
+/**
+ * Pop and call the top cleanup routine.
+ * The pthread_cleanup_pop() function pops the top cleanup routine off
+ * of the current threads cleanup routine stack, and, if execute is
+ * non-zero, it will execute the function. If there is no cleanup
+ * routine then pthread_cleanup_pop() does nothing.
+ *
+ * @param  execute If execute is non-zero, the top-most clean-up handler
+ * is popped and executed.
+ * @bug The main thread do not support cleanup routines.
+ */
 void pthread_cleanup_pop(int execute)
 {
     arch_thread_info *pv = (arch_thread_info *) TlsGetValue(libpthread_tls_index);
-    arch_thread_cleanup_list *node = pv->cleanup_list, *prev;
+    if (pv != NULL) {
+        arch_thread_cleanup_list *node = pv->cleanup_list, *prev;
 
-    if (node == NULL) return;
-    while(node->next != NULL)
-        node = node->next;
+        if (node == NULL) return;
+        while(node->next != NULL)
+            node = node->next;
 
-    if (execute) {
-        node->cleaner(node->arg);
+        if (execute) {
+            node->cleaner(node->arg);
+        }
+
+        prev = node->prev;
+        HeapFree(libpthread_heap, 0, node);
+        if(prev == NULL)
+            pv->cleanup_list = NULL;
+        else
+            prev->next = NULL;
     }
-
-    prev = node->prev;
-    HeapFree(libpthread_heap, 0, node);
-    if(prev == NULL)
-        pv->cleanup_list = NULL;
-    else
-        prev->next = NULL;
 }
 
-unsigned int __stdcall worker_proxy (void *arg)
+static unsigned int __stdcall worker_proxy (void *arg)
 {
     arch_thread_info *pv = (arch_thread_info *) arg;
 
@@ -157,60 +231,102 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_
     return 0;
 }
 
+/**
+ * Terminate calling thread.
+ *
+ * @param value_ptr The pointer of the calling thread return value.
+ */
 void pthread_exit(void *value_ptr)
 {
     arch_thread_info *pv = (arch_thread_info *) TlsGetValue(libpthread_tls_index);
-    pv->return_value = value_ptr;
+    if (pv != NULL) {
+        pv->return_value = value_ptr;
 
-    /* Call clean-up handlers, and free memory */
-    if (pv->cleanup_list) {
-        arch_thread_cleanup_list *node = pv->cleanup_list;
-        while(node->next != NULL)
-            node = node->next;
-        do {
-            arch_thread_cleanup_list *prev = node->prev;
-            node->cleaner(node->arg);
-            HeapFree(libpthread_heap, 0, node);
-            node = prev;
-        } while(node != NULL);
-        pv->cleanup_list = NULL;
+        /* Call clean-up handlers, and free memory */
+        if (pv->cleanup_list) {
+            arch_thread_cleanup_list *node = pv->cleanup_list;
+            while(node->next != NULL)
+                node = node->next;
+            do {
+                arch_thread_cleanup_list *prev = node->prev;
+                node->cleaner(node->arg);
+                HeapFree(libpthread_heap, 0, node);
+                node = prev;
+            } while(node != NULL);
+            pv->cleanup_list = NULL;
+        }
+
+        /* Make sure we free ourselves if we are detached */
+        if ((pv->state & PTHREAD_CREATE_DETACHED) == PTHREAD_CREATE_DETACHED) {
+            CloseHandle (pv->handle);
+            HeapFree(libpthread_heap, 0, pv);
+            TlsSetValue(libpthread_tls_index, NULL);
+        }
+
+        _endthreadex(0);
+    } else {
+        exit(1); /* User should not call pthread_exit in the main thread */
     }
-
-    /* Make sure we free ourselves if we are detached */
-    if ((pv->state & PTHREAD_CREATE_DETACHED) == PTHREAD_CREATE_DETACHED) {
-        CloseHandle (pv->handle);
-        HeapFree(libpthread_heap, 0, pv);
-        TlsSetValue(libpthread_tls_index, NULL);
-    }
-
-    _endthreadex(0);
 }
 
+/**
+ * Detach a thread.
+ *
+ * @param t The thread to be detached.
+ * @return If the function succeeds, the return value is 0.
+ *         If the function fails, the return value is -1,
+ *         with errno set to indicate the error.
+
+ * @bug The main thread do not support detach.
+ */
 int pthread_detach (pthread_t t)
 {
     DWORD dwFlags;
     arch_thread_info *pv = (arch_thread_info *) t;
-    pv->state |= PTHREAD_CREATE_DETACHED;
+    if (pv != NULL) {
+        pv->state |= PTHREAD_CREATE_DETACHED;
 
-    if (pv == NULL || pv->handle == NULL || !GetHandleInformation(pv->handle, &dwFlags))
-        return ESRCH;
+        if (pv == NULL || pv->handle == NULL || !GetHandleInformation(pv->handle, &dwFlags))
+            return ESRCH;
 
-    if (pv->handle != NULL)
-        CloseHandle(pv->handle);
+        if (pv->handle != NULL)
+            CloseHandle(pv->handle);
+    }
 
     return 0;
 }
 
+/**
+ * Get the calling thread's ID.
+ *
+ * @return The calling thread's ID.
+ * @bug The pthread_self() function returns NULL for main thread.
+ * I don't think the main thread should support join, detach, or cleanup routines.
+ */
 pthread_t pthread_self(void)
 {
     return (pthread_t) TlsGetValue(libpthread_tls_index);
 }
 
+/**
+ * Compare thread IDs.
+ *
+ * @return If the thread IDs t1 and t2 correspond to the same thread,
+ * the return value is non-zero, otherwise it will return zero.
+ */
 int pthread_equal(pthread_t t1, pthread_t t2)
 {
     return t1 == t2;
 }
 
+/**
+ * Wait for thread termination.
+ *
+ * @param thread The target thread wait for termination.
+ * @return If the function succeeds, the return value is 0.
+ * Otherwise an error number will be returned to indicate the error.
+ * @bug The main thread do not support join.
+ */
 int pthread_join(pthread_t thread, void **value_ptr)
 {
     DWORD dwFlags;
@@ -236,6 +352,7 @@ int pthread_join(pthread_t thread, void **value_ptr)
 
 /**
  * Once-only initialization.
+ *
  * @param  once_control The control variable which initialized to PTHREAD_ONCE_INIT.
  * @param  init_routine The initialization code which executed at most once.
  * @return Always return 0.
