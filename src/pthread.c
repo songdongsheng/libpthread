@@ -323,6 +323,7 @@ int pthread_equal(pthread_t t1, pthread_t t2)
  * Wait for thread termination.
  *
  * @param thread The target thread wait for termination.
+ * @param value_ptr The pointer of the target thread return value.
  * @return If the function succeeds, the return value is 0.
  * Otherwise an error number will be returned to indicate the error.
  * @bug The main thread do not support join.
