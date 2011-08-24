@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-#define PTHREAD_KEYS_MAX     1024
+#define PTHREAD_KEYS_MAX            1024
 
 #define PTHREAD_PROCESS_PRIVATE     0
 #define PTHREAD_PROCESS_SHARED      1
@@ -71,6 +71,9 @@ pthread_t pthread_self(void);
 int pthread_equal(pthread_t t1, pthread_t t2);
 void pthread_exit(void *value_ptr);
 int pthread_kill(pthread_t t, int sig);
+
+void pthread_cleanup_push(void (*cleanup_routine)(void *), void *arg);
+void pthread_cleanup_pop(int execute);
 
 int pthread_key_create(pthread_key_t *key, void (* destructor)(void *));
 int pthread_key_delete(pthread_key_t key);
