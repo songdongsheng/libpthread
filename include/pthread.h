@@ -20,6 +20,21 @@
 #ifndef _PTHREAD_H_
 #define _PTHREAD_H_
 
+/**
+ * @file pthread.h
+ * @brief POSIX Thread Definitions and Routines
+ */
+
+/**
+ * @defgroup libpthread POSIX Thread Library for Windows
+ * @{
+ */
+
+/**
+ * @defgroup thread POSIX Thread Definitions and Routines
+ * @{
+ */
+
 #include <pthread_types.h>
 
 #ifdef __cplusplus
@@ -152,5 +167,8 @@ int pthread_barrierattr_getpshared(void **attr, int *s);
 #ifdef __cplusplus
 }
 #endif
+
+/** @} */
+/** @} */
 
 #endif /* _PTHREAD_H_ */

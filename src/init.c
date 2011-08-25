@@ -17,6 +17,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file init.c
+ * @brief Initialization Code of Libpthread
+ */
+
 #include <winsock2.h>
 
 HANDLE libpthread_heap;

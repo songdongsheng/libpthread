@@ -17,6 +17,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file clock.c
+ * @brief Implementation Code of POSIX Time Routines
+ */
+
 #include <stdio.h>
 #include <pthread_clock.h>
 

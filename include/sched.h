@@ -20,6 +20,16 @@
 #ifndef _SCHED_H_
 #define _SCHED_H_       1
 
+/**
+ * @file sched.h
+ * @brief POSIX Scheduling Definitions and Routines
+ */
+
+/**
+ * @defgroup sched POSIX Scheduling Definitions and Routines
+ * @{
+ */
+
 #include <pthread_types.h>
 
 #ifdef __cplusplus
@@ -48,5 +58,7 @@ int sched_setparam(pid_t pid, const struct sched_param *param);
 #ifdef __cplusplus
 }
 #endif
+
+/** @} */
 
 #endif /* _SCHED_H_ */

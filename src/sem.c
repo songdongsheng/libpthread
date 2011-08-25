@@ -17,6 +17,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file sem.c
+ * @brief Implementation Code of Semaphore Routines
+ */
+
 #include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>

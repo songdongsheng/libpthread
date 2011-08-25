@@ -20,6 +20,16 @@
 #ifndef _SEMAPHORE_H_
 #define _SEMAPHORE_H_   1
 
+/**
+ * @file semaphore.h
+ * @brief POSIX Semaphore Definitions and Routines
+ */
+
+/**
+ * @defgroup sem POSIX Semaphore Definitions and Routines
+ * @{
+ */
+
 #include <pthread_types.h>
 
 #ifdef __cplusplus
@@ -50,5 +60,7 @@ int sem_unlink(const char *name);
 #ifdef __cplusplus
 }
 #endif
+
+/** @} */
 
 #endif /* _SEMAPHORE_H_ */

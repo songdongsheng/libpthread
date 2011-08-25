@@ -20,6 +20,11 @@
 #ifndef _ARCH_THREAD_H_
 #define _ARCH_THREAD_H_ 1
 
+/**
+ * @file arch.h
+ * @brief POSIX Implementation-related Definitions
+ */
+
 #include <winsock2.h>
 
 typedef struct

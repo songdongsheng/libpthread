@@ -17,6 +17,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file key.c
+ * @brief Implementation Code of TSD/TLS
+ */
+
 #include <pthread.h>
 #include <stdio.h>
 

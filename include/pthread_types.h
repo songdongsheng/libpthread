@@ -20,6 +20,17 @@
 #ifndef _PTHREAD_TYPES_H_
 #define _PTHREAD_TYPES_H_   1
 
+/**
+ * @file pthread_types.h
+ * @brief POSIX Thread Support Definitions
+ */
+
+/**
+ * @defgroup thread_def POSIX Thread Support Definitions
+ * @ingroup libpthread
+ * @{
+ */
+
 #include <errno.h> /* Adding definition of EINVAL, ETIMEDOUT, ..., etc. */
 #include <fcntl.h> /* Adding O_CREAT definition. */
 #include <limits.h> /* Adding INT_MAX, UINT_MAX definition.*/
@@ -71,11 +82,6 @@ typedef intptr_t pid_t;
 #define _PID_T_     1
 #endif
 
-#ifndef __clockid_t_defined
-typedef int clockid_t;
-#define __clockid_t_defined     1
-#endif  /* __clockid_t_defined */
-
 #ifndef _MODE_T_
     typedef unsigned short _mode_t;
     #define _MODE_T_            1
@@ -84,6 +90,38 @@ typedef int clockid_t;
     typedef _mode_t mode_t;
     #endif
 #endif  /* _MODE_T_ */
+
+#ifndef ENOTSUP
+#define ENOTSUP         129 /* This is the value in VC 2010. */
+#endif
+
+#ifndef ETIMEDOUT
+#define ETIMEDOUT       138 /* This is the value in VC 2010. */
+#endif
+
+/** @} */
+
+/**
+ * @defgroup clock POSIX Time Routines
+ * @{
+ */
+
+#ifndef __clockid_t_defined
+typedef int clockid_t;
+#define __clockid_t_defined     1
+#endif  /* __clockid_t_defined */
+
+#ifndef CLOCK_REALTIME
+#define CLOCK_REALTIME  0
+#endif
+
+#ifndef CLOCK_MONOTONIC
+#define CLOCK_MONOTONIC 1
+#endif
+
+#ifndef TIMER_ABSTIME
+#define TIMER_ABSTIME  1
+#endif
 
 #ifndef _TIMESPEC_DEFINED
 struct timespec {
@@ -98,24 +136,6 @@ struct itimerspec {
 #define _TIMESPEC_DEFINED       1
 #endif  /* _TIMESPEC_DEFINED */
 
-#ifndef ENOTSUP
-#define ENOTSUP         129 /* This is the value in VC 2010. */
-#endif
-
-#ifndef ETIMEDOUT
-#define ETIMEDOUT       138 /* This is the value in VC 2010. */
-#endif
-
-#ifndef CLOCK_REALTIME
-#define CLOCK_REALTIME  0
-#endif
-
-#ifndef CLOCK_MONOTONIC
-#define CLOCK_MONOTONIC 1
-#endif
-
-#ifndef TIMER_ABSTIME
-#define TIMER_ABSTIME  1
-#endif
+/** @} */
 
 #endif /* _PTHREAD_TYPES_H_ */

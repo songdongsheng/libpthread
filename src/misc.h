@@ -20,6 +20,11 @@
 #ifndef _MISC_H_
 #define _MISC_H_    1
 
+/**
+ * @file misc.h
+ * @brief Miscellaneous Definitions and Code
+ */
+
 /* Number of 100ns-seconds between the beginning of the Windows epoch
  * (Jan. 1, 1601) and the Unix epoch (Jan. 1, 1970)
  */

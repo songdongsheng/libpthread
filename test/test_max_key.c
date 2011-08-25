@@ -22,7 +22,8 @@
 
 #include <winsock2.h>
 
-/* 32-bit (XP) test_max_key passed (1086) */
+/* 32-bit (Windows XP, 2008 R2) test_max_key passed (1086) */
+/* 64-bit (Windows 2008 R2)     test_max_key passed (1085) */
 int main(int argc, char *argv[])
 {
     int count = 0;

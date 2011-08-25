@@ -20,6 +20,16 @@
 #ifndef _PTHREAD_CLOCK_H_
 #define _PTHREAD_CLOCK_H_   1
 
+/**
+ * @file pthread_clock.h
+ * @brief POSIX Time Routines
+ */
+
+/**
+ * @defgroup clock POSIX Time Routines
+ * @{
+ */
+
 #include <pthread_types.h>
 
 #ifdef __cplusplus
@@ -38,5 +48,7 @@ int clock_nanosleep(clockid_t clock_id, int flags,
 #ifdef __cplusplus
 }
 #endif
+
+/** @} */
 
 #endif /* _PTHREAD_CLOCK_H_ */
