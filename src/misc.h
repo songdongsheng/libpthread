@@ -34,10 +34,7 @@
 /* Number of 100ns-seconds between the beginning of the Windows epoch
  * (Jan. 1, 1601) and the Unix epoch (Jan. 1, 1970)
  */
-#define DELTA_EPOCH_IN_SEC      INT64_C(11644473600)
-#define DELTA_EPOCH_IN_USEC     INT64_C(11644473600000000)
 #define DELTA_EPOCH_IN_100NS    INT64_C(116444736000000000)
-#define DELTA_EPOCH_IN_NS       INT64_C(11644473600000000000)
 
 #define POW10_2     INT64_C(100)
 #define POW10_3     INT64_C(1000)
