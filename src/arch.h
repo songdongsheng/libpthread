@@ -22,7 +22,13 @@
 
 /**
  * @file arch.h
- * @brief POSIX Implementation-related Definitions
+ * @brief Implementation-related Definitions
+ */
+
+/**
+ * @defgroup impl Implementation-related Definitions and Code
+ * @ingroup libpthread
+ * @{
  */
 
 #include <winsock2.h>
@@ -69,5 +75,7 @@ typedef struct {
 typedef struct {
     char cond[8]; /* InitializeConditionVariable */
 } arch_thread_cond;
+
+/** @} */
 
 #endif

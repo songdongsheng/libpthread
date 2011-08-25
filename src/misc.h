@@ -22,7 +22,13 @@
 
 /**
  * @file misc.h
- * @brief Miscellaneous Definitions and Code
+ * @brief Implementation-related Miscellaneous Definitions and Code
+ */
+
+/**
+ * @defgroup impl Implementation-related Definitions and Code
+ * @ingroup libpthread
+ * @{
  */
 
 /* Number of 100ns-seconds between the beginning of the Windows epoch
@@ -135,4 +141,7 @@ __asm {
 
     return prev;
 }
+
+/** @} */
+
 #endif
