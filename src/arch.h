@@ -38,6 +38,13 @@ typedef struct
     HANDLE handle;
 } arch_sem_t;
 
+typedef struct
+{
+    size_t stack_size;
+    int detach_state;
+    int inherit_sched;
+} arch_attr_t;
+
 struct arch_thread_cleanup_node {
     void (* cleaner)(void *);
     void *arg;

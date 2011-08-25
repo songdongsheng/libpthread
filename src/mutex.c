@@ -32,17 +32,20 @@
 
 extern HANDLE libpthread_heap;
 
-static arch_thread_mutex * arch_mutex_init(pthread_mutex_t *m)
+static void arch_mutex_init(pthread_mutex_t *m)
 {
     arch_thread_mutex *pv = HeapAlloc(libpthread_heap, HEAP_ZERO_MEMORY | HEAP_GENERATE_EXCEPTIONS, sizeof(arch_thread_mutex));
     InitializeCriticalSection(& pv->mutex);
-    return pv;
+
+    if (atomic_cmpxchg_ptr(m, pv, NULL) != NULL) {
+        DeleteCriticalSection(& pv->mutex);
+        HeapFree(libpthread_heap, 0, pv);
+    }
 }
 
 int pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a)
 {
-    *m = (pthread_mutex_t *) arch_mutex_init(m);
-
+    arch_mutex_init(m);
     return 0;
 }
 
@@ -59,15 +62,9 @@ int pthread_mutex_destroy(pthread_mutex_t *m)
 
 int pthread_mutex_lock(pthread_mutex_t *m)
 {
-    arch_thread_mutex *pv = NULL;
+    arch_thread_mutex *pv;
 
-    if (*m == NULL)  {
-        arch_thread_mutex *tm = arch_mutex_init(m);
-        if (atomic_cmpxchg_ptr(m, tm, NULL) != NULL) {
-            DeleteCriticalSection(& tm->mutex);
-            HeapFree(libpthread_heap, 0, tm);
-        }
-    }
+    if (*m == NULL) arch_mutex_init(m);
 
     pv = (arch_thread_mutex *) *m;
 
@@ -77,26 +74,15 @@ int pthread_mutex_lock(pthread_mutex_t *m)
 
 int pthread_mutex_trylock(pthread_mutex_t *m)
 {
-    arch_thread_mutex *pv = NULL;
+    arch_thread_mutex *pv;
 
-    if (*m == NULL)  {
-        arch_thread_mutex *tm = arch_mutex_init(m);
-        if (atomic_cmpxchg_ptr(m, tm, NULL) != NULL) {
-            DeleteCriticalSection(& tm->mutex);
-            HeapFree(libpthread_heap, 0, tm);
-        }
-    }
+    if (*m == NULL) arch_mutex_init(m);
 
     pv = (arch_thread_mutex *) *m;
 
     if( 0 != TryEnterCriticalSection(& pv->mutex))
         return 0;
     return set_errno(EBUSY);
-}
-
-int pthread_mutex_timedlock(pthread_mutex_t *m, const struct timespec *ts)
-{
-    return pthread_mutex_lock(m);
 }
 
 int pthread_mutex_unlock(pthread_mutex_t *m)

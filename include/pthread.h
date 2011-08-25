@@ -121,7 +121,6 @@ int pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a);
 int pthread_mutex_destroy(pthread_mutex_t *m);
 int pthread_mutex_lock(pthread_mutex_t *m);
 int pthread_mutex_trylock(pthread_mutex_t *m);
-int pthread_mutex_timedlock(pthread_mutex_t *m, const struct timespec *ts);
 int pthread_mutex_unlock(pthread_mutex_t *m);
 
 int pthread_barrier_destroy(pthread_barrier_t *b);
@@ -136,10 +135,10 @@ int pthread_spin_unlock(pthread_spinlock_t *l);
 
 int pthread_attr_init(pthread_attr_t *attr);
 int pthread_attr_destroy(pthread_attr_t *attr);
-int pthread_attr_setdetachstate(pthread_attr_t *a, int flag);
-int pthread_attr_getdetachstate(const pthread_attr_t *a, int *flag);
-int pthread_attr_setinheritsched(pthread_attr_t *a, int flag);
-int pthread_attr_getinheritsched(const pthread_attr_t *a, int *flag);
+int pthread_attr_setdetachstate(pthread_attr_t *attr, int flag);
+int pthread_attr_getdetachstate(const pthread_attr_t *attr, int *flag);
+int pthread_attr_setinheritsched(pthread_attr_t *attr, int flag);
+int pthread_attr_getinheritsched(const pthread_attr_t *attr, int *flag);
 int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *size);
 int pthread_attr_setstacksize(pthread_attr_t *attr, size_t size);
 

@@ -33,44 +33,66 @@
 extern DWORD libpthread_tls_index;
 extern HANDLE libpthread_heap;
 
+/**
+ * Initialize thread attributes object.
+ * @param  attr The thread attributes object.
+ * @return Always return 0.
+ */
 int pthread_attr_init(pthread_attr_t *attr)
 {
-    return set_errno(ENOTSUP);
-}
+    if ((*attr = HeapAlloc(libpthread_heap, HEAP_ZERO_MEMORY, sizeof(arch_attr_t))) == NULL)
+        return set_errno(ENOMEM);
 
-int pthread_attr_destroy(pthread_attr_t *attr)
-{
-    return set_errno(ENOTSUP);
+    return 0;
 }
 
 int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *size)
 {
-    return set_errno(ENOTSUP);
+    arch_attr_t *pv = (arch_attr_t *) *attr;
+    *size = pv->stack_size;
+    return 0;
 }
 
 int pthread_attr_setstacksize(pthread_attr_t *attr, size_t size)
 {
-    return set_errno(ENOTSUP);
+    arch_attr_t *pv = (arch_attr_t *) attr;
+    pv->stack_size = size;
+    return 0;
 }
 
-int pthread_attr_setdetachstate(pthread_attr_t *a, int flag)
+int pthread_attr_getdetachstate(const pthread_attr_t *attr, int *flag)
 {
-    return set_errno(ENOTSUP);
+    arch_attr_t *pv = (arch_attr_t *) attr;
+    *flag = pv->detach_state;
+    return 0;
 }
 
-int pthread_attr_getdetachstate(const pthread_attr_t *a, int *flag)
+int pthread_attr_setdetachstate(pthread_attr_t *attr, int flag)
 {
-    return set_errno(ENOTSUP);
+    arch_attr_t *pv = (arch_attr_t *) attr;
+    pv->detach_state = flag;
+    return 0;
 }
 
-int pthread_attr_setinheritsched(pthread_attr_t *a, int flag)
+int pthread_attr_getinheritsched(const pthread_attr_t *attr, int *flag)
 {
-    return set_errno(ENOTSUP);
+    arch_attr_t *pv = (arch_attr_t *) attr;
+    *flag = pv->inherit_sched;
+    return 0;
 }
 
-int pthread_attr_getinheritsched(const pthread_attr_t *a, int *flag)
+int pthread_attr_setinheritsched(pthread_attr_t *attr, int flag)
 {
-    return set_errno(ENOTSUP);
+    arch_attr_t *pv = (arch_attr_t *) attr;
+    pv->inherit_sched = flag;
+    return 0;
+}
+
+int pthread_attr_destroy(pthread_attr_t *attr)
+{
+    if (attr != NULL)
+        HeapFree(libpthread_heap, 0, attr);
+    return 0;
 }
 
 /**
