@@ -31,6 +31,15 @@
  * @{
  */
 
+#ifdef _MSC_VER
+#include <intrin.h>
+#pragma intrinsic(_InterlockedCompareExchange, _mm_pause)
+
+#ifdef _WIN64
+#pragma intrinsic(_InterlockedCompareExchangePointer)
+#endif
+#endif
+
 /* Number of 100ns-seconds between the beginning of the Windows epoch
  * (Jan. 1, 1601) and the Unix epoch (Jan. 1, 1970)
  */
@@ -103,40 +112,71 @@ static __inline unsigned arch_rel_time_in_ms(const struct timespec *ts)
     return (unsigned) t;
 }
 
+static __inline void memory_barrier(void)
+{
+#ifdef _MSC_VER
+    MemoryBarrier();
+    /* __faststorefence() */
+    /* __asm lock or dword ptr [rsp], 0 */
+#else
+    __sync_synchronize();
+    /* asm volatile("lock orl $0x0,(%%esp)" ::: "memory"); */
+#endif
+}
+
 static __inline void cpu_relax(void)
 {
 #ifdef _MSC_VER
-    __asm rep nop
+    YieldProcessor();
+    /* _mm_pause(); */
+    /* __asm rep nop */
 #else
+    /* __builtin_ia32_pause(); */
     asm volatile("rep; nop" ::: "memory");
 #endif
 }
 
 /*
  * http://gcc.gnu.org/onlinedocs/gcc/Machine-Constraints.html
+ * http://gcc.gnu.org/onlinedocs/gcc/Atomic-Builtins.html
  * http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html
+ * http://msdn.microsoft.com/en-us/library/7kcdt6fy.aspx [x64 Software Conventions, RAX, (RCX, RDX, R8, R9), R10, R11]
+ * http://msdn.microsoft.com/zh-cn/library/26td21ds.aspx [Compiler Intrinsics]
  */
 static __inline long atomic_cmpxchg(long volatile *__ptr, long __new, long __old)
 {
-    long prev;
-
 #ifdef _MSC_VER
-__asm {
-    push         ecx
-    push         edx
-    mov          ecx, dword ptr [__ptr]
-    mov          edx, dword ptr [__new]
-    mov          eax, dword ptr [__old]
-    lock cmpxchg dword ptr [ecx], edx
-    mov          dword ptr [prev], eax
-    pop          edx
-    pop          ecx
-}
+    return _InterlockedCompareExchange(__ptr, __new, __old);
 #else
+    return __sync_val_compare_and_swap (__ptr, __old, __new);
+/*
+    long prev;
     asm volatile("lock ; cmpxchgl %2, %1" : "=a" (prev), "+m" (*__ptr) : "q" (__new), "0" (__old) : "memory");
-#endif
-
     return prev;
+ */
+#endif
+}
+
+static __inline void *atomic_cmpxchg_ptr(void * volatile *__ptr, void *__new, void *__old)
+{
+#ifdef _MSC_VER
+#ifdef _WIN64
+    return _InterlockedCompareExchangePointer(__ptr, __new, __old);
+#else
+    return (void *) _InterlockedCompareExchange((volatile long *) __ptr, (long) __new, (long) __old);
+#endif
+#else
+    return __sync_val_compare_and_swap (__ptr, __old, __new);
+/*
+  void *prev;
+#ifdef _WIN64
+    asm volatile("lock ; cmpxchgq %2, %1" : "=a" (prev),"+m" (*__ptr) : "q" (__new), "0" (__old) : "memory");
+#else
+    asm volatile("lock ; cmpxchgl %2, %1" : "=a" (prev),"+m" (*__ptr) : "q" (__new), "0" (__old) : "memory");
+#endif
+  return prev;
+ */
+#endif
 }
 
 /** @} */

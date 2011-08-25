@@ -59,10 +59,15 @@ int pthread_mutex_destroy(pthread_mutex_t *m)
 
 int pthread_mutex_lock(pthread_mutex_t *m)
 {
-    arch_thread_mutex *pv;
+    arch_thread_mutex *pv = NULL;
 
-    if (*m == NULL) /* TODO: Lock */
-        *m = (pthread_mutex_t *) arch_mutex_init(m);
+    if (*m == NULL)  {
+        arch_thread_mutex *tm = arch_mutex_init(m);
+        if (atomic_cmpxchg_ptr(m, tm, NULL) != NULL) {
+            DeleteCriticalSection(& tm->mutex);
+            HeapFree(libpthread_heap, 0, tm);
+        }
+    }
 
     pv = (arch_thread_mutex *) *m;
 
@@ -72,10 +77,15 @@ int pthread_mutex_lock(pthread_mutex_t *m)
 
 int pthread_mutex_trylock(pthread_mutex_t *m)
 {
-    arch_thread_mutex *pv;
+    arch_thread_mutex *pv = NULL;
 
-    if (*m == NULL) /* TODO: Lock */
-        *m = (pthread_mutex_t *) arch_mutex_init(m);
+    if (*m == NULL)  {
+        arch_thread_mutex *tm = arch_mutex_init(m);
+        if (atomic_cmpxchg_ptr(m, tm, NULL) != NULL) {
+            DeleteCriticalSection(& tm->mutex);
+            HeapFree(libpthread_heap, 0, tm);
+        }
+    }
 
     pv = (arch_thread_mutex *) *m;
 

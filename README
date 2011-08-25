@@ -17,6 +17,8 @@ or
 
 == Requirements
 Following programs are requred to build:
-  - MinGW-w64 gcc 4.6 or later
-    Microsoft C/C++ Compiler 2008 or later
   - CMake 2.8 or later
+
+  - The source files can only be compiled by MSVC or GCC:
+    * Microsoft Visual C++ 2008 or later
+    * MinGW-w64 gcc 4.6 or later
