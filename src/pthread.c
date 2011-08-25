@@ -28,6 +28,46 @@
 extern DWORD libpthread_tls_index;
 extern HANDLE libpthread_heap;
 
+int pthread_attr_init(pthread_attr_t *attr)
+{
+    return set_errno(ENOTSUP);
+}
+
+int pthread_attr_destroy(pthread_attr_t *attr)
+{
+    return set_errno(ENOTSUP);
+}
+
+int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *size)
+{
+    return set_errno(ENOTSUP);
+}
+
+int pthread_attr_setstacksize(pthread_attr_t *attr, size_t size)
+{
+    return set_errno(ENOTSUP);
+}
+
+int pthread_attr_setdetachstate(pthread_attr_t *a, int flag)
+{
+    return set_errno(ENOTSUP);
+}
+
+int pthread_attr_getdetachstate(const pthread_attr_t *a, int *flag)
+{
+    return set_errno(ENOTSUP);
+}
+
+int pthread_attr_setinheritsched(pthread_attr_t *a, int flag)
+{
+    return set_errno(ENOTSUP);
+}
+
+int pthread_attr_getinheritsched(const pthread_attr_t *a, int *flag)
+{
+    return set_errno(ENOTSUP);
+}
+
 /**
  * Create a cancellation point in the calling thread.
  *

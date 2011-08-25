@@ -1,12 +1,11 @@
 ADD_LIBRARY (${LIBPTHREAD_NAME} SHARED libpthread.def version.rc
-        attr.c
         clock.c
         key.c
         mutex.c
         pthread.c
         sched.c
         sem.c
-        init_shared.c)
+        init.c)
 SET_TARGET_PROPERTIES (${LIBPTHREAD_NAME} PROPERTIES VERSION ${libpthread_VERSION_MAJOR}.${libpthread_VERSION_MINOR})
 
 IF (CMAKE_COMPILER_IS_GNUCC AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
