@@ -36,6 +36,14 @@ CMakeCache.txt
 DartConfiguration.tcl
 CMakeFiles/
 Testing/
+Debug/
+ipch/
+_ReSharper.*/
+*.dir/
+*.sln
+*.vcxproj*
+*.sdf
+*.opensdf
 
 #
 # Doxygen generated files

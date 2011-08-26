@@ -5,6 +5,7 @@ ADD_LIBRARY (${LIBPTHREAD_NAME} SHARED libpthread.def version.rc
         pthread.c
         sched.c
         sem.c
+        spin.c
         init.c)
 SET_TARGET_PROPERTIES (${LIBPTHREAD_NAME} PROPERTIES VERSION ${libpthread_VERSION_MAJOR}.${libpthread_VERSION_MINOR})
 

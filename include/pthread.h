@@ -56,9 +56,10 @@ extern "C" {
 #define PTHREAD_MUTEX_ERRORCHECK    2
 #define PTHREAD_MUTEX_DEFAULT       PTHREAD_MUTEX_NORMAL
 
-#define PTHREAD_MUTEX_INITIALIZER   NULL
-#define PTHREAD_RWLOCK_INITIALIZER  NULL
-#define PTHREAD_COND_INITIALIZER    NULL
+#define PTHREAD_SPINLOCK_INITIALIZER    0
+#define PTHREAD_MUTEX_INITIALIZER       NULL
+#define PTHREAD_RWLOCK_INITIALIZER      NULL
+#define PTHREAD_COND_INITIALIZER        NULL
 
 typedef uintptr_t pthread_t;
 typedef void *pthread_attr_t;
@@ -127,11 +128,11 @@ int pthread_barrier_destroy(pthread_barrier_t *b);
 int pthread_barrier_init(pthread_barrier_t *b, const void *attr, unsigned int count);
 int pthread_barrier_wait(pthread_barrier_t *b);
 
-int pthread_spin_init(pthread_spinlock_t *l, int pshared);
-int pthread_spin_destroy(pthread_spinlock_t *l);
-int pthread_spin_lock(pthread_spinlock_t *l);
-int pthread_spin_trylock(pthread_spinlock_t *l);
-int pthread_spin_unlock(pthread_spinlock_t *l);
+int pthread_spin_init(pthread_spinlock_t *lock, int pshared);
+int pthread_spin_destroy(pthread_spinlock_t *lock);
+int pthread_spin_lock(pthread_spinlock_t *lock);
+int pthread_spin_trylock(pthread_spinlock_t *lock);
+int pthread_spin_unlock(pthread_spinlock_t *lock);
 
 int pthread_attr_init(pthread_attr_t *attr);
 int pthread_attr_destroy(pthread_attr_t *attr);

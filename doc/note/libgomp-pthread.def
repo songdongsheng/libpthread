@@ -1,3 +1,7 @@
+; dlltool --input-def libgomp-pthread.def --output-lib libgomp-pthread.dll.a
+LIBRARY libpthread.dll
+EXPORTS
+
 pthread_attr_init
 pthread_attr_getstacksize
 pthread_attr_setstacksize
