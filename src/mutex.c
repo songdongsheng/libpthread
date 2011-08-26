@@ -19,7 +19,7 @@
 
 /**
  * @file mutex.c
- * @brief Implementation Code of Mutex
+ * @brief Implementation Code of Mutex Routines
  */
 
 #include <pthread.h>

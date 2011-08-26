@@ -19,7 +19,7 @@
 
 /**
  * @file spin.c
- * @brief Implementation Code of Spin Lock
+ * @brief Implementation Code of Spin Lock Routines
  */
 
 #include <pthread.h>

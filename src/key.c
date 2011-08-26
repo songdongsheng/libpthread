@@ -19,7 +19,7 @@
 
 /**
  * @file key.c
- * @brief Implementation Code of TSD/TLS
+ * @brief Implementation Code of TSD/TLS Routines
  */
 
 #include <pthread.h>
@@ -37,7 +37,16 @@
 
 extern HANDLE libpthread_heap;
 
-int pthread_key_create(pthread_key_t *key, void (* dest)(void *))
+/**
+ * Create thread-specific data key.
+ * @param  key The thread-specific data key.
+ * @param  destructor Ignored.
+ * @return If the function succeeds, the return value is 0.
+ *         If the function fails, the return value is -1,
+ *         with errno set to indicate the error (EAGAIN).
+ * @bug We do not support thread-specific data key destructor (yet).
+ */
+int pthread_key_create(pthread_key_t *key, void (* destructor)(void *))
 {
     if ((*key = TlsAlloc()) == TLS_OUT_OF_INDEXES)
         return set_errno(EAGAIN);
@@ -45,14 +54,29 @@ int pthread_key_create(pthread_key_t *key, void (* dest)(void *))
     return 0;
 }
 
-int pthread_key_delete(pthread_key_t key)
+/**
+ * Set a thread-specific data value.
+ * @param  key The thread-specific data key.
+ * @param  value The thread-specific value.
+ * @return If the function succeeds, the return value is 0.
+ *         If the function fails, the return value is -1,
+ *         with errno set to indicate the error (EINVAL).
+ */
+int pthread_setspecific(pthread_key_t key, const void *value)
 {
-    if (TlsFree(key) == 0)
+    if (TlsSetValue(key, (LPVOID) value) == 0)
         return set_errno(EINVAL);
 
     return 0;
 }
 
+/**
+ * Get a thread-specific data value.
+ * @param  key The thread-specific data key.
+ * @return This function will return the thread-specific data value
+ *         associated with the given key. If no such value, then the
+ *         value NULL is returned.
+ */
 void *pthread_getspecific(pthread_key_t key)
 {
     void *rp = TlsGetValue(key);
@@ -63,9 +87,16 @@ void *pthread_getspecific(pthread_key_t key)
     return rp;
 }
 
-int pthread_setspecific(pthread_key_t key, const void *value)
+/**
+ * Delete a thread-specific data key.
+ * @param  key The thread-specific data key.
+ * @return If the function succeeds, the return value is 0.
+ *         If the function fails, the return value is -1,
+ *         with errno set to indicate the error (EINVAL).
+ */
+int pthread_key_delete(pthread_key_t key)
 {
-    if (TlsSetValue(key, (LPVOID) value) == 0)
+    if (TlsFree(key) == 0)
         return set_errno(EINVAL);
 
     return 0;

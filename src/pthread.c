@@ -19,7 +19,7 @@
 
 /**
  * @file pthread.c
- * @brief Implementation Code of Thread
+ * @brief Implementation Code of Thread Routines
  */
 
 #include <pthread.h>
@@ -343,7 +343,6 @@ void pthread_exit(void *value_ptr)
  * @return If the function succeeds, the return value is 0.
  *         If the function fails, the return value is -1,
  *         with errno set to indicate the error.
-
  * @bug The main thread do not support detach.
  */
 int pthread_detach (pthread_t t)
