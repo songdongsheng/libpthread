@@ -21,7 +21,7 @@ pthread_mutex_unlock
 pthread_mutex_destroy
 
 sem_init
-sem_post
-sem_trywait
 sem_wait
+sem_trywait
+sem_post
 sem_destroy
