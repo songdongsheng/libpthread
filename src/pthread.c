@@ -337,6 +337,60 @@ void pthread_exit(void *value_ptr)
 }
 
 /**
+ * Get scheduling policy and parameters of a thread.
+ * @param  policy Always return SCHED_OTHER.
+ * @param  param The thread scheduling priority.
+ * @return If the function succeeds, the return value is 0.
+ *         If the function fails, the return value is -1,
+ *         with errno set to indicate the error (ESRCH).
+ */
+int pthread_getschedparam(pthread_t thread, int *policy, struct sched_param *param)
+{
+    if (policy != NULL)
+        *policy = SCHED_OTHER;
+
+    if (param != NULL) {
+        int priority;
+        HANDLE handle;
+        arch_thread_info *pv = (arch_thread_info *) thread;
+
+        if (pv != NULL) handle = pv->handle;
+        else handle = GetCurrentThread();
+
+        priority = GetThreadPriority(handle);
+        if (priority == THREAD_PRIORITY_ERROR_RETURN)
+            return set_errno(ESRCH);
+        param->sched_priority = os_priority_to_sched_priority(priority);
+    }
+
+    return 0;
+}
+
+/**
+ * Set scheduling policy and parameters of a thread.
+ * @param  policy Ignored.
+ * @param  param The thread scheduling priority.
+ * @return If the function succeeds, the return value is 0.
+ *         If the function fails, the return value is -1,
+ *         with errno set to indicate the error (ESRCH).
+ */
+int pthread_setschedparam(pthread_t thread, int policy, const struct sched_param *param)
+{
+    if (param != NULL) {
+        HANDLE handle;
+        arch_thread_info *pv = (arch_thread_info *) thread;
+
+        if (pv != NULL) handle = pv->handle;
+        else handle = GetCurrentThread();
+
+        if (SetThreadPriority(handle, sched_priority_to_os_priority(param->sched_priority)) == 0)
+            return set_errno(ESRCH);
+    }
+
+    return 0;
+}
+
+/**
  * Detach a thread.
  *
  * @param t The thread to be detached.

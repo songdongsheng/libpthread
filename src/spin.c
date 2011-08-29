@@ -53,7 +53,7 @@ int pthread_spin_init(pthread_spinlock_t *lock, int pshared)
  */
 int pthread_spin_lock(pthread_spinlock_t *lock)
 {
-    while(atomic_cmpxchg(lock, 1, 0) != 0)
+    while(atomic_cmpxchg((volatile long *) lock, 1, 0) != 0)
         cpu_relax();
 
     return 0;
@@ -67,7 +67,7 @@ int pthread_spin_lock(pthread_spinlock_t *lock)
  */
 int pthread_spin_trylock(pthread_spinlock_t *lock)
 {
-    long rv = atomic_cmpxchg(lock, 1, 0);
+    long rv = atomic_cmpxchg((volatile long *) lock, 1, 0);
     if (rv == 0) return 0;
     return set_errno(EBUSY);
 }

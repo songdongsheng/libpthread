@@ -36,6 +36,8 @@
  */
 
 #include <pthread_types.h>
+#include <sched.h>
+#include <semaphore.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -95,11 +97,14 @@ int pthread_once(pthread_once_t *once_control, void (* init_routine)(void));
 pthread_t pthread_self(void);
 int pthread_equal(pthread_t t1, pthread_t t2);
 void pthread_exit(void *value_ptr);
-int pthread_kill(pthread_t t, int sig);
+
+int pthread_setschedparam(pthread_t thread, int policy, const struct sched_param *param);
+int pthread_getschedparam(pthread_t thread, int *policy, struct sched_param *param);
 
 void pthread_cleanup_push(void (*cleanup_routine)(void *), void *arg);
 void pthread_cleanup_pop(int execute);
 
+int pthread_kill(pthread_t t, int sig);
 int pthread_cancel(pthread_t t);
 int pthread_setcancelstate(int state, int *oldstate);
 int pthread_setcanceltype(int type, int *oldtype);

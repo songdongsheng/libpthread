@@ -67,31 +67,7 @@ int sched_getscheduler(pid_t pid)
 int sched_setscheduler(pid_t pid, int policy, const struct sched_param *param)
 {
     if (pid == 0 && policy == SCHED_OTHER && param != NULL) {
-        int priority;
-
-        /* THREAD_PRIORITY_TIME_CRITICAL (15) */
-        /* THREAD_PRIORITY_HIGHEST (12, 13, 14) */
-        /* THREAD_PRIORITY_ABOVE_NORMAL (9, 10, 11) */
-        /* THREAD_PRIORITY_NORMAL (8) */
-        /* THREAD_PRIORITY_BELOW_NORMAL (5, 6, 7) */
-        /* THREAD_PRIORITY_LOWEST (2, 3, 4) */
-        /* THREAD_PRIORITY_IDLE (1) */
-
-        if (param->sched_priority >= 15)
-            priority = THREAD_PRIORITY_TIME_CRITICAL;
-        else if (param->sched_priority >= 12)
-            priority = THREAD_PRIORITY_HIGHEST;
-        else if (param->sched_priority >= 9)
-            priority = THREAD_PRIORITY_ABOVE_NORMAL;
-        else if (param->sched_priority >= 8)
-            priority = THREAD_PRIORITY_NORMAL;
-        else if (param->sched_priority >= 5)
-            priority = THREAD_PRIORITY_BELOW_NORMAL;
-        else if (param->sched_priority >= 2)
-            priority = THREAD_PRIORITY_LOWEST;
-        else
-            priority = THREAD_PRIORITY_IDLE;
-
+        int priority = sched_priority_to_os_priority(param->sched_priority);
         if(!SetThreadPriority(GetCurrentThread(), priority))
             return set_errno(EPERM);
     }
@@ -141,37 +117,8 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
 int sched_getparam(pid_t pid, struct sched_param *param)
 {
     param->sched_priority = 8; /* THREAD_PRIORITY_NORMAL */
-    if (pid == 0) {
-        switch(GetThreadPriority(GetCurrentThread())) {
-            case THREAD_PRIORITY_TIME_CRITICAL:
-                param->sched_priority = 15;
-                break;
-
-            case THREAD_PRIORITY_HIGHEST:
-                param->sched_priority = 13;
-                break;
-
-            case THREAD_PRIORITY_ABOVE_NORMAL:
-                param->sched_priority = 10;
-                break;
-
-            case THREAD_PRIORITY_NORMAL:
-                param->sched_priority = 8;
-                break;
-
-            case THREAD_PRIORITY_BELOW_NORMAL:
-                param->sched_priority = 6;
-                break;
-
-            case THREAD_PRIORITY_LOWEST:
-                param->sched_priority = 3;
-                break;
-
-            case THREAD_PRIORITY_IDLE:
-                param->sched_priority = 1;
-                break;
-        }
-    }
+    if (pid == 0)
+        param->sched_priority = os_priority_to_sched_priority(GetThreadPriority(GetCurrentThread()));
 
     return 0;
 }

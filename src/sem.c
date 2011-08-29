@@ -225,7 +225,6 @@ int sem_destroy(sem_t *sem)
  */
 sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)
 {
-    unsigned rc;
     int len;
     char buffer[512];
     arch_sem_t *pv;
@@ -246,7 +245,7 @@ sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)
 
     if ((pv->handle = CreateSemaphore (NULL, value, SEM_VALUE_MAX, buffer)) == NULL)
     {
-        switch() {
+        switch(GetLastError()) {
             case ERROR_ACCESS_DENIED:
                 set_errno(EACCES);
                 break;

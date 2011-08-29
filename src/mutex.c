@@ -80,7 +80,7 @@ int pthread_mutexattr_settype(pthread_mutexattr_t *a, int type)
  */
 int pthread_mutexattr_getpshared(const pthread_mutexattr_t *a, int *pshared)
 {
-    *type = PTHREAD_PROCESS_PRIVATE;
+    *pshared = PTHREAD_PROCESS_PRIVATE;
     return 0;
 }
 
@@ -93,7 +93,7 @@ int pthread_mutexattr_getpshared(const pthread_mutexattr_t *a, int *pshared)
  */
 int pthread_mutexattr_setpshared(pthread_mutexattr_t * a, int pshared)
 {
-    if (type != PTHREAD_PROCESS_PRIVATE)
+    if (pshared != PTHREAD_PROCESS_PRIVATE)
         return set_errno(EINVAL);
 
     *a = 0;
@@ -191,6 +191,7 @@ static int arch_mutex_init(pthread_mutex_t *m)
  */
 int pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a)
 {
+    *m = NULL;
     return arch_mutex_init(m);
 }
 
@@ -203,11 +204,10 @@ int pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a)
  */
 int pthread_mutex_lock(pthread_mutex_t *m)
 {
-    int rc;
     arch_thread_mutex *pv;
 
     if (*m == NULL) {
-        rc = arch_mutex_init(m);
+        int rc = arch_mutex_init(m);
         if (rc != 0) return rc;
     }
 
@@ -229,7 +229,7 @@ int pthread_mutex_trylock(pthread_mutex_t *m)
     arch_thread_mutex *pv;
 
     if (*m == NULL) {
-        rc = arch_mutex_init(m);
+        int rc = arch_mutex_init(m);
         if (rc != 0) return rc;
     }
 

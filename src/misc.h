@@ -112,6 +112,68 @@ static __inline unsigned arch_rel_time_in_ms(const struct timespec *ts)
     return (unsigned) t;
 }
 
+static __inline int sched_priority_to_os_priority(int priority)
+{
+    /* THREAD_PRIORITY_TIME_CRITICAL (15) */
+    /* THREAD_PRIORITY_HIGHEST (12, 13, 14) */
+    /* THREAD_PRIORITY_ABOVE_NORMAL (9, 10, 11) */
+    /* THREAD_PRIORITY_NORMAL (8) */
+    /* THREAD_PRIORITY_BELOW_NORMAL (5, 6, 7) */
+    /* THREAD_PRIORITY_LOWEST (2, 3, 4) */
+    /* THREAD_PRIORITY_IDLE (1) */
+
+    if (priority >= 15)
+        return THREAD_PRIORITY_TIME_CRITICAL;
+    else if (priority >= 12)
+        return THREAD_PRIORITY_HIGHEST;
+    else if (priority >= 9)
+        return THREAD_PRIORITY_ABOVE_NORMAL;
+    else if (priority >= 8)
+        return THREAD_PRIORITY_NORMAL;
+    else if (priority >= 5)
+        return THREAD_PRIORITY_BELOW_NORMAL;
+    else if (priority >= 2)
+        return THREAD_PRIORITY_LOWEST;
+    else
+        return THREAD_PRIORITY_IDLE;
+}
+
+static __inline int os_priority_to_sched_priority(int os_priority)
+{
+    int priority = 8;
+    switch(os_priority) {
+        case THREAD_PRIORITY_TIME_CRITICAL:
+            priority = 15;
+            break;
+
+        case THREAD_PRIORITY_HIGHEST:
+            priority = 13;
+            break;
+
+        case THREAD_PRIORITY_ABOVE_NORMAL:
+            priority = 10;
+            break;
+
+        case THREAD_PRIORITY_NORMAL:
+            priority = 8;
+            break;
+
+        case THREAD_PRIORITY_BELOW_NORMAL:
+            priority = 6;
+            break;
+
+        case THREAD_PRIORITY_LOWEST:
+            priority = 3;
+            break;
+
+        case THREAD_PRIORITY_IDLE:
+            priority = 1;
+            break;
+    }
+
+    return priority;
+}
+
 static __inline void memory_barrier(void)
 {
 #ifdef _MSC_VER
