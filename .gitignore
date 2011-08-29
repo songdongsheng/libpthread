@@ -16,14 +16,20 @@
 *.cmake
 *.dll
 *.exe
+*.exp
 *.gz
+*.ilk
+*.lib
 *.lst
 *.lzma
 *.lzo
+*.manifest
 *.o
 *.o.*
 *.orig
 *.patch
+*.pdb
+*.res
 *.s
 *.so
 *.xz
@@ -40,10 +46,11 @@ Debug/
 ipch/
 _ReSharper.*/
 *.dir/
+*.opensdf
+*.resource.txt
+*.sdf
 *.sln
 *.vcxproj*
-*.sdf
-*.opensdf
 
 #
 # Doxygen generated files

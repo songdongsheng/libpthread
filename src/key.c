@@ -35,8 +35,6 @@
  * thread local storage = TLS
  */
 
-extern HANDLE libpthread_heap;
-
 /**
  * Create thread-specific data key.
  * @param  key The thread-specific data key.

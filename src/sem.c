@@ -220,6 +220,8 @@ int sem_destroy(sem_t *sem)
  *        with the given name already exists.
  * @param mode Ignored (The mode argument specifies the permissions to be
  *        placed on the new semaphore).
+ * @param value The value argument specifies the initial value for
+ *        the semaphore.
  * @return On success, returns the address of the new semaphore; On error,
  *         returns SEM_FAILED (NULL), with errno set to indicate the error.
  */

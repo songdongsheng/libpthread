@@ -24,6 +24,7 @@
 
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <winsock2.h>
 
@@ -31,7 +32,6 @@
 #include "misc.h"
 
 extern DWORD libpthread_tls_index;
-extern HANDLE libpthread_heap;
 
 /**
  * Initialize thread attributes object.
@@ -40,7 +40,7 @@ extern HANDLE libpthread_heap;
  */
 int pthread_attr_init(pthread_attr_t *attr)
 {
-    arch_attr_t *pv = HeapAlloc(libpthread_heap, HEAP_ZERO_MEMORY, sizeof(arch_attr_t));
+    arch_attr_t *pv = calloc(1, sizeof(arch_attr_t));
     if (pv == NULL)
         return set_errno(ENOMEM);
 
@@ -162,8 +162,11 @@ int pthread_attr_getschedparam(pthread_attr_t *attr, struct sched_param *param)
  */
 int pthread_attr_destroy(pthread_attr_t *attr)
 {
-    if (attr != NULL)
-        HeapFree(libpthread_heap, 0, attr);
+    if (attr != NULL) {
+        free(*attr);
+        *attr = NULL;
+    }
+
     return 0;
 }
 
@@ -253,10 +256,10 @@ void pthread_testcancel(void)
 void pthread_cleanup_push(void (*cleanup_routine)(void *), void *arg)
 {
     arch_thread_cleanup_list *next;
-    arch_thread_info *pv = (arch_thread_info *) TlsGetValue(libpthread_tls_index);
+    arch_thread_info *pv = TlsGetValue(libpthread_tls_index);
 
     if (pv != NULL) {
-        arch_thread_cleanup_list *node = (arch_thread_cleanup_list *) HeapAlloc(libpthread_heap, HEAP_ZERO_MEMORY, sizeof(arch_thread_cleanup_list));
+        arch_thread_cleanup_list *node = calloc(1, sizeof(arch_thread_cleanup_list));
 
         node->arg = arg;
         node->cleaner = cleanup_routine;
@@ -288,7 +291,7 @@ void pthread_cleanup_push(void (*cleanup_routine)(void *), void *arg)
  */
 void pthread_cleanup_pop(int execute)
 {
-    arch_thread_info *pv = (arch_thread_info *) TlsGetValue(libpthread_tls_index);
+    arch_thread_info *pv = TlsGetValue(libpthread_tls_index);
     if (pv != NULL) {
         arch_thread_cleanup_list *node = pv->cleanup_list, *prev;
 
@@ -301,7 +304,7 @@ void pthread_cleanup_pop(int execute)
         }
 
         prev = node->prev;
-        HeapFree(libpthread_heap, 0, node);
+        free(node);
         if(prev == NULL)
             pv->cleanup_list = NULL;
         else
@@ -327,7 +330,7 @@ static unsigned int __stdcall worker_proxy (void *arg)
              *
              * node->cleaner(node->arg);
              */
-            HeapFree(libpthread_heap, 0, node);
+            free(node);
             node = next;
         } while(node != NULL);
         pv->cleanup_list = NULL;
@@ -336,17 +339,27 @@ static unsigned int __stdcall worker_proxy (void *arg)
     /* Make sure we free ourselves if we are detached */
     if ((pv->state & PTHREAD_CREATE_DETACHED) == PTHREAD_CREATE_DETACHED) {
         CloseHandle (pv->handle);
-        HeapFree(libpthread_heap, 0, pv);
+        free(pv);
         TlsSetValue(libpthread_tls_index, NULL);
     }
 
     return 0;
 }
 
+/**
+ * Create a new thread.
+ * @param thread The new thread.
+ * @param attr The thread attributes object.
+ * @param start_routine The application-defined function to be executed by the new thread.
+ * @param arg The pointer to a variable to be passed to the thread.
+ * @return If the function succeeds, the return value is 0.
+ *         If the function fails, the return value is -1,
+ *         with errno set to indicate the error.
+ */
 int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine)(void *), void *arg)
 {
     unsigned stack_size = 0;
-    arch_thread_info *pv = (arch_thread_info *) HeapAlloc(libpthread_heap, HEAP_ZERO_MEMORY, sizeof(arch_thread_info));
+    arch_thread_info *pv = calloc(1, sizeof(arch_thread_info));
     if (pv == NULL)
         return set_errno(ENOMEM);
 
@@ -358,7 +371,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_
     pv->handle = (HANDLE) _beginthreadex(NULL, stack_size, worker_proxy, pv, CREATE_SUSPENDED, NULL);
 
     if (pv->handle == INVALID_HANDLE_VALUE) {
-        HeapFree(libpthread_heap, 0, pv);
+        free(pv);
         return errno;
     }
 
@@ -383,7 +396,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_
  */
 void pthread_exit(void *value_ptr)
 {
-    arch_thread_info *pv = (arch_thread_info *) TlsGetValue(libpthread_tls_index);
+    arch_thread_info *pv = TlsGetValue(libpthread_tls_index);
     if (pv != NULL) {
         pv->return_value = value_ptr;
 
@@ -395,7 +408,7 @@ void pthread_exit(void *value_ptr)
             do {
                 arch_thread_cleanup_list *prev = node->prev;
                 node->cleaner(node->arg);
-                HeapFree(libpthread_heap, 0, node);
+                free(node);
                 node = prev;
             } while(node != NULL);
             pv->cleanup_list = NULL;
@@ -404,7 +417,7 @@ void pthread_exit(void *value_ptr)
         /* Make sure we free ourselves if we are detached */
         if ((pv->state & PTHREAD_CREATE_DETACHED) == PTHREAD_CREATE_DETACHED) {
             CloseHandle (pv->handle);
-            HeapFree(libpthread_heap, 0, pv);
+            free(pv);
             TlsSetValue(libpthread_tls_index, NULL);
         }
 
@@ -416,6 +429,7 @@ void pthread_exit(void *value_ptr)
 
 /**
  * Get scheduling policy and parameters of a thread.
+ * @param thread The target thread.
  * @param  policy Always return SCHED_OTHER.
  * @param  param The thread scheduling priority.
  * @return If the function succeeds, the return value is 0.
@@ -446,6 +460,7 @@ int pthread_getschedparam(pthread_t thread, int *policy, struct sched_param *par
 
 /**
  * Set scheduling policy and parameters of a thread.
+ * @param thread The target thread.
  * @param  policy Ignored.
  * @param  param The thread scheduling priority.
  * @return If the function succeeds, the return value is 0.

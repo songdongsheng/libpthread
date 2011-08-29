@@ -24,13 +24,12 @@
 
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <winsock2.h>
 
 #include "arch.h"
 #include "misc.h"
-
-extern HANDLE libpthread_heap;
 
 /**
  * Create a mutex attribute object.
@@ -166,14 +165,14 @@ int pthread_mutexattr_destroy(pthread_mutexattr_t *a)
 
 static int arch_mutex_init(pthread_mutex_t *m)
 {
-    arch_thread_mutex *pv = HeapAlloc(libpthread_heap, HEAP_ZERO_MEMORY, sizeof(arch_thread_mutex));
+    arch_thread_mutex *pv = calloc(1, sizeof(arch_thread_mutex));
     if (pv == NULL)
         return set_errno(ENOMEM);
 
     InitializeCriticalSection(& pv->mutex);
     if (atomic_cmpxchg_ptr(m, pv, NULL) != NULL) {
         DeleteCriticalSection(& pv->mutex);
-        HeapFree(libpthread_heap, 0, pv);
+        free(pv);
     }
 
     return 0;
@@ -268,7 +267,7 @@ int pthread_mutex_destroy(pthread_mutex_t *m)
     arch_thread_mutex *pv = (arch_thread_mutex *) *m;
     if (pv != NULL) {
         DeleteCriticalSection(& pv->mutex);
-        HeapFree(libpthread_heap, 0, pv);
+        free(pv);
     }
 
     return 0;
