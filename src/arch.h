@@ -41,10 +41,14 @@ typedef struct
 
 typedef struct
 {
-    size_t stack_size;
     int detach_state;
+    size_t guard_size;
     int inherit_sched;
-    struct sched_param param;
+    int sched_policy;
+    struct sched_param sched_param;
+    int scope;
+    void *stack_addr;
+    size_t stack_size;
 } arch_attr_t;
 
 struct arch_thread_cleanup_node {

@@ -34,6 +34,42 @@
 extern DWORD libpthread_tls_index;
 
 /**
+ * Register fork handlers.
+ * @param  prepare The prepare fork handler shall be called before fork() processing commences.
+ * @param  parent The parent fork handle shall be called after fork() processing completes in the parent process.
+ * @param  child The child fork handler shall be called after fork() processing completes in the child process.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_atfork(void (*prepare)(void), void (*parent)(void), void (*child)(void))
+{
+    return 0;
+}
+
+static int libpthread_concurrency = 0;
+
+/**
+ * Get the level of concurrency.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_getconcurrency(void)
+{
+    return libpthread_concurrency;
+}
+
+/**
+ * Set the level of concurrency.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_setconcurrency(int new_level)
+{
+    libpthread_concurrency = new_level;
+    return 0;
+}
+
+/**
  * Initialize thread attributes object.
  * @param  attr The thread attributes object.
  * @return Always return 0.
@@ -44,36 +80,11 @@ int pthread_attr_init(pthread_attr_t *attr)
     if (pv == NULL)
         return set_errno(ENOMEM);
 
-    pv->param.sched_priority = 8;
+    pv->sched_policy = SCHED_OTHER;
+    pv->sched_param.sched_priority = 8;
 
     *attr = pv;
 
-    return 0;
-}
-
-/**
- * Get stack size attribute in thread attributes object.
- * @param  attr The thread attributes object.
- * @param  size The stack size pointer.
- * @return Always return 0.
- */
-int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *size)
-{
-    arch_attr_t *pv = (arch_attr_t *) *attr;
-    *size = pv->stack_size;
-    return 0;
-}
-
-/**
- * Set stack size attribute in thread attributes object.
- * @param  attr The thread attributes object.
- * @param  size The stack size pointer.
- * @return Always return 0.
- */
-int pthread_attr_setstacksize(pthread_attr_t *attr, size_t size)
-{
-    arch_attr_t *pv = (arch_attr_t *) attr;
-    pv->stack_size = size;
     return 0;
 }
 
@@ -100,6 +111,30 @@ int pthread_attr_setdetachstate(pthread_attr_t *attr, int flag)
 {
     arch_attr_t *pv = (arch_attr_t *) attr;
     pv->detach_state = flag;
+    return 0;
+}
+
+/**
+ * Get the thread guardsize attribute.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_attr_getguardsize(const pthread_attr_t *attr, size_t *size)
+{
+    arch_attr_t *pv = (arch_attr_t *) attr;
+    *size = pv->guard_size;
+    return 0;
+}
+
+/**
+ * Set the thread guardsize attribute.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_attr_setguardsize(pthread_attr_t *attr, size_t size)
+{
+    arch_attr_t *pv = (arch_attr_t *) attr;
+    pv->guard_size = size;
     return 0;
 }
 
@@ -138,7 +173,7 @@ int pthread_attr_setinheritsched(pthread_attr_t *attr, int flag)
 int pthread_attr_setschedparam(pthread_attr_t *attr, const struct sched_param *param)
 {
     arch_attr_t *pv = (arch_attr_t *) attr;
-    pv->param.sched_priority = param->sched_priority;
+    pv->sched_param.sched_priority = param->sched_priority;
     return 0;
 }
 
@@ -151,7 +186,125 @@ int pthread_attr_setschedparam(pthread_attr_t *attr, const struct sched_param *p
 int pthread_attr_getschedparam(pthread_attr_t *attr, struct sched_param *param)
 {
     arch_attr_t *pv = (arch_attr_t *) attr;
-    param->sched_priority = pv->param.sched_priority;
+    param->sched_priority = pv->sched_param.sched_priority;
+    return 0;
+}
+
+/**
+ * Set the scheduling policy attribute.
+ * @param  attr The thread attributes object.
+ * @param  policy The scheduling policy parameter.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_attr_getschedpolicy(const pthread_attr_t *attr, int *policy)
+{
+    arch_attr_t *pv = (arch_attr_t *) attr;
+    *policy = pv->sched_policy;
+    return 0;
+}
+
+/**
+ * Set the scheduling policy attribute.
+ * @param  attr The thread attributes object.
+ * @param  policy The scheduling policy parameter.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_attr_setschedpolicy(pthread_attr_t *attr, int policy)
+{
+    arch_attr_t *pv = (arch_attr_t *) attr;
+    pv->sched_policy = policy;
+    return 0;
+}
+
+/**
+ * Get the contention scope attribute.
+ * @param  attr The thread attributes object.
+ * @param  scope The contention scope parameter.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_attr_getscope(const pthread_attr_t *attr, int *scope)
+{
+    arch_attr_t *pv = (arch_attr_t *) attr;
+    *scope = pv->scope;
+    return 0;
+}
+
+/**
+ * Set the contention scope attribute.
+ * @param  attr The thread attributes object.
+ * @param  scope The contention scope parameter.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_attr_setscope(pthread_attr_t *attr, int scope)
+{
+    arch_attr_t *pv = (arch_attr_t *) attr;
+    pv->scope = scope;
+    return 0;
+}
+
+/**
+ * Get the stack attribute.
+ * @param  attr The thread attributes object.
+ * @param  addr The stack address parameter.
+ * @param  size The stack size parameter.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_attr_getstack(const pthread_attr_t *attr, void **addr, size_t *size)
+{
+    arch_attr_t *pv = (arch_attr_t *) attr;
+
+    if (addr != NULL) *addr = pv->stack_addr;
+    if (size != NULL) *size = pv->stack_size;
+
+    return 0;
+}
+
+/**
+ * Set the stack attribute.
+ * @param  attr The thread attributes object.
+ * @param  addr The stack address parameter.
+ * @param  size The stack size parameter.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_attr_setstack(pthread_attr_t *attr, void *addr, size_t size)
+{
+    arch_attr_t *pv = (arch_attr_t *) attr;
+
+    pv->stack_addr = addr;
+    pv->stack_size = size;
+
+    return 0;
+}
+
+/**
+ * Get stack size attribute in thread attributes object.
+ * @param  attr The thread attributes object.
+ * @param  size The stack size pointer.
+ * @return Always return 0.
+ */
+int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *size)
+{
+    arch_attr_t *pv = (arch_attr_t *) *attr;
+    *size = pv->stack_size;
+    return 0;
+}
+
+/**
+ * Set stack size attribute in thread attributes object.
+ * @param  attr The thread attributes object.
+ * @param  size The stack size pointer.
+ * @return Always return 0.
+ */
+int pthread_attr_setstacksize(pthread_attr_t *attr, size_t size)
+{
+    arch_attr_t *pv = (arch_attr_t *) attr;
+    pv->stack_size = size;
     return 0;
 }
 
@@ -376,7 +529,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_
     }
 
     if (attr != NULL) {
-        SetThreadPriority(pv->handle, sched_priority_to_os_priority(((arch_attr_t * ) attr)->param.sched_priority));
+        SetThreadPriority(pv->handle, sched_priority_to_os_priority(((arch_attr_t * ) attr)->sched_param.sched_priority));
 
         if ((((arch_attr_t * ) attr)->detach_state & PTHREAD_CREATE_DETACHED) != 0) {
             CloseHandle(pv->handle);
@@ -469,16 +622,30 @@ int pthread_getschedparam(pthread_t thread, int *policy, struct sched_param *par
  */
 int pthread_setschedparam(pthread_t thread, int policy, const struct sched_param *param)
 {
-    if (param != NULL) {
-        HANDLE handle;
-        arch_thread_info *pv = (arch_thread_info *) thread;
+    if (param != NULL)
+        return pthread_setschedprio(thread, param->sched_priority);
 
-        if (pv != NULL) handle = pv->handle;
-        else handle = GetCurrentThread();
+    return 0;
+}
 
-        if (SetThreadPriority(handle, sched_priority_to_os_priority(param->sched_priority)) == 0)
-            return set_errno(ESRCH);
-    }
+/**
+ * Set scheduling priority of a thread.
+ * @param thread The target thread.
+ * @param  priority The thread scheduling priority.
+ * @return If the function succeeds, the return value is 0.
+ *         If the function fails, the return value is -1,
+ *         with errno set to indicate the error (ESRCH).
+ */
+int pthread_setschedprio(pthread_t thread, int priority)
+{
+    HANDLE handle;
+    arch_thread_info *pv = (arch_thread_info *) thread;
+
+    if (pv != NULL) handle = pv->handle;
+    else handle = GetCurrentThread();
+
+    if (SetThreadPriority(handle, sched_priority_to_os_priority(priority)) == 0)
+        return set_errno(ESRCH);
 
     return 0;
 }

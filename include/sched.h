@@ -22,11 +22,11 @@
 
 /**
  * @file sched.h
- * @brief POSIX Scheduling Definitions and Routines
+ * @brief POSIX Process Scheduling Definitions and Routines
  */
 
 /**
- * @defgroup sched POSIX Scheduling Definitions and Routines
+ * @defgroup sched POSIX Process Scheduling Definitions and Routines
  * @{
  */
 
