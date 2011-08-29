@@ -34,6 +34,8 @@ EXPORTS
     pthread_attr_setdetachstate
     pthread_attr_getinheritsched
     pthread_attr_setinheritsched
+    pthread_attr_getschedparam
+    pthread_attr_setschedparam
     pthread_attr_destroy
 
     pthread_create

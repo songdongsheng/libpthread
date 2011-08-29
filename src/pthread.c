@@ -40,12 +40,23 @@ extern HANDLE libpthread_heap;
  */
 int pthread_attr_init(pthread_attr_t *attr)
 {
-    if ((*attr = HeapAlloc(libpthread_heap, HEAP_ZERO_MEMORY, sizeof(arch_attr_t))) == NULL)
+    arch_attr_t *pv = HeapAlloc(libpthread_heap, HEAP_ZERO_MEMORY, sizeof(arch_attr_t));
+    if (pv == NULL)
         return set_errno(ENOMEM);
+
+    pv->param.sched_priority = 8;
+
+    *attr = pv;
 
     return 0;
 }
 
+/**
+ * Get stack size attribute in thread attributes object.
+ * @param  attr The thread attributes object.
+ * @param  size The stack size pointer.
+ * @return Always return 0.
+ */
 int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *size)
 {
     arch_attr_t *pv = (arch_attr_t *) *attr;
@@ -53,6 +64,12 @@ int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *size)
     return 0;
 }
 
+/**
+ * Set stack size attribute in thread attributes object.
+ * @param  attr The thread attributes object.
+ * @param  size The stack size pointer.
+ * @return Always return 0.
+ */
 int pthread_attr_setstacksize(pthread_attr_t *attr, size_t size)
 {
     arch_attr_t *pv = (arch_attr_t *) attr;
@@ -60,6 +77,12 @@ int pthread_attr_setstacksize(pthread_attr_t *attr, size_t size)
     return 0;
 }
 
+/**
+ * Get detach state in thread attributes object.
+ * @param  attr The thread attributes object.
+ * @param  flag The detach state pointer.
+ * @return Always return 0.
+ */
 int pthread_attr_getdetachstate(const pthread_attr_t *attr, int *flag)
 {
     arch_attr_t *pv = (arch_attr_t *) attr;
@@ -67,6 +90,12 @@ int pthread_attr_getdetachstate(const pthread_attr_t *attr, int *flag)
     return 0;
 }
 
+/**
+ * Set detach state in thread attributes object.
+ * @param  attr The thread attributes object.
+ * @param  flag The detach state pointer.
+ * @return Always return 0.
+ */
 int pthread_attr_setdetachstate(pthread_attr_t *attr, int flag)
 {
     arch_attr_t *pv = (arch_attr_t *) attr;
@@ -74,6 +103,12 @@ int pthread_attr_setdetachstate(pthread_attr_t *attr, int flag)
     return 0;
 }
 
+/**
+ * Get inherit scheduler attribute in thread attributes object.
+ * @param  attr The thread attributes object.
+ * @param  flag The detach state pointer.
+ * @return Always return 0.
+ */
 int pthread_attr_getinheritsched(const pthread_attr_t *attr, int *flag)
 {
     arch_attr_t *pv = (arch_attr_t *) attr;
@@ -81,6 +116,12 @@ int pthread_attr_getinheritsched(const pthread_attr_t *attr, int *flag)
     return 0;
 }
 
+/**
+ * Set inherit scheduler attribute in thread attributes object.
+ * @param  attr The thread attributes object.
+ * @param  flag The detach state pointer.
+ * @return Always return 0.
+ */
 int pthread_attr_setinheritsched(pthread_attr_t *attr, int flag)
 {
     arch_attr_t *pv = (arch_attr_t *) attr;
@@ -88,6 +129,37 @@ int pthread_attr_setinheritsched(pthread_attr_t *attr, int flag)
     return 0;
 }
 
+/**
+ * Set scheduling parameter attributes in thread attributes object.
+ * @param  attr The thread attributes object.
+ * @param  param The scheduling parameter.
+ * @return Always return 0.
+ */
+int pthread_attr_setschedparam(pthread_attr_t *attr, const struct sched_param *param)
+{
+    arch_attr_t *pv = (arch_attr_t *) attr;
+    pv->param.sched_priority = param->sched_priority;
+    return 0;
+}
+
+/**
+ * Get scheduling parameter attributes in thread attributes object.
+ * @param  attr The thread attributes object.
+ * @param  param The scheduling parameter.
+ * @return Always return 0.
+ */
+int pthread_attr_getschedparam(pthread_attr_t *attr, struct sched_param *param)
+{
+    arch_attr_t *pv = (arch_attr_t *) attr;
+    param->sched_priority = pv->param.sched_priority;
+    return 0;
+}
+
+/**
+ * Destroy thread attributes object.
+ * @param  attr The thread attributes object.
+ * @return Always return 0.
+ */
 int pthread_attr_destroy(pthread_attr_t *attr)
 {
     if (attr != NULL)
@@ -96,14 +168,32 @@ int pthread_attr_destroy(pthread_attr_t *attr)
 }
 
 /**
- * Create a cancellation point in the calling thread.
+ * Send a signal to a specified thread.
+ *
+ * @param  thread The thread to be signaled.
+ * @param  sig The signal to be send.
+ * @return Always return 0.
+ *
+ * @remark Windows don't really well support signals.
+ * In addition to return 0, this function does nothing.
+ */
+int pthread_kill(pthread_t thread, int sig)
+{
+    return 0;
+}
+
+/**
+ * Cancel execution of a thread.
+ *
+ * @param  thread The thread to be canceled.
+ * @return Always return 0.
  *
  * @bug We do not support cancel point (yet).
  * In addition to return 0, this function does nothing.
  */
-void pthread_testcancel(void)
+int pthread_cancel(pthread_t thread)
 {
-    return;
+    return 0;
 }
 
 /**
@@ -143,32 +233,14 @@ int pthread_setcanceltype(int type, int *oldtype)
 }
 
 /**
- * Cancel execution of a thread.
- *
- * @param  thread The thread to be canceled.
- * @return Always return 0.
+ * Create a cancellation point in the calling thread.
  *
  * @bug We do not support cancel point (yet).
  * In addition to return 0, this function does nothing.
  */
-int pthread_cancel(pthread_t thread)
+void pthread_testcancel(void)
 {
-    return 0;
-}
-
-/**
- * Send a signal to a specified thread.
- *
- * @param  thread The thread to be signaled.
- * @param  sig The signal to be send.
- * @return Always return 0.
- *
- * @remark Windows don't really well support signals.
- * In addition to return 0, this function does nothing.
- */
-int pthread_kill(pthread_t thread, int sig)
-{
-    return 0;
+    return;
 }
 
 /**
@@ -273,25 +345,32 @@ static unsigned int __stdcall worker_proxy (void *arg)
 
 int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine)(void *), void *arg)
 {
+    unsigned stack_size = 0;
     arch_thread_info *pv = (arch_thread_info *) HeapAlloc(libpthread_heap, HEAP_ZERO_MEMORY, sizeof(arch_thread_info));
     if (pv == NULL)
         return set_errno(ENOMEM);
 
-    /* TODO: use attr (StackSize)to create thread */
+    if (attr != NULL) stack_size = ((arch_attr_t * ) attr)->stack_size;
+
     pv->arg = arg;
     pv->worker = start_routine;
     pv->state = PTHREAD_CREATE_JOINABLE;
-    pv->handle = (HANDLE) _beginthreadex(NULL, 0, worker_proxy, pv, CREATE_SUSPENDED, NULL);
+    pv->handle = (HANDLE) _beginthreadex(NULL, stack_size, worker_proxy, pv, CREATE_SUSPENDED, NULL);
 
     if (pv->handle == INVALID_HANDLE_VALUE) {
         HeapFree(libpthread_heap, 0, pv);
         return errno;
     }
 
-    /* TODO: SetThreadPriority */
+    if (attr != NULL) {
+        SetThreadPriority(pv->handle, sched_priority_to_os_priority(((arch_attr_t * ) attr)->param.sched_priority));
 
-    if ((pv->state & PTHREAD_CREATE_DETACHED) != 0)
-      CloseHandle(pv->handle);
+        if ((((arch_attr_t * ) attr)->detach_state & PTHREAD_CREATE_DETACHED) != 0) {
+            CloseHandle(pv->handle);
+            pv->state = PTHREAD_CREATE_DETACHED;
+            pv->handle = NULL;
+        }
+    }
 
     ResumeThread(pv->handle);
     *thread = (pthread_t) pv;
@@ -300,7 +379,6 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_
 
 /**
  * Terminate calling thread.
- *
  * @param value_ptr The pointer of the calling thread return value.
  */
 void pthread_exit(void *value_ptr)
@@ -418,7 +496,6 @@ int pthread_detach (pthread_t t)
 
 /**
  * Get the calling thread's ID.
- *
  * @return The calling thread's ID.
  * @bug The pthread_self() function returns NULL for main thread.
  * I don't think the main thread should support join, detach, or cleanup routines.
@@ -430,7 +507,6 @@ pthread_t pthread_self(void)
 
 /**
  * Compare thread IDs.
- *
  * @return If the thread IDs t1 and t2 correspond to the same thread,
  * the return value is non-zero, otherwise it will return zero.
  */
@@ -441,11 +517,10 @@ int pthread_equal(pthread_t t1, pthread_t t2)
 
 /**
  * Wait for thread termination.
- *
  * @param thread The target thread wait for termination.
  * @param value_ptr The pointer of the target thread return value.
  * @return If the function succeeds, the return value is 0.
- * Otherwise an error number will be returned to indicate the error.
+ *         Otherwise an error number will be returned to indicate the error.
  * @bug The main thread do not support join.
  */
 int pthread_join(pthread_t thread, void **value_ptr)
@@ -473,7 +548,6 @@ int pthread_join(pthread_t thread, void **value_ptr)
 
 /**
  * Once-only initialization.
- *
  * @param  once_control The control variable which initialized to PTHREAD_ONCE_INIT.
  * @param  init_routine The initialization code which executed at most once.
  * @return Always return 0.

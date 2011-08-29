@@ -89,6 +89,8 @@ int pthread_attr_setinheritsched(pthread_attr_t *attr, int flag);
 int pthread_attr_getinheritsched(const pthread_attr_t *attr, int *flag);
 int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *size);
 int pthread_attr_setstacksize(pthread_attr_t *attr, size_t size);
+int pthread_attr_setschedparam(pthread_attr_t *attr, const struct sched_param *param);
+int pthread_attr_getschedparam(pthread_attr_t *attr, struct sched_param *param);
 
 int pthread_create(pthread_t *t, const pthread_attr_t *attr, void *(* start_routine)(void *), void *arg);
 int pthread_join(pthread_t t, void **value_ptr);

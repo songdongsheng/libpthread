@@ -32,6 +32,7 @@
  */
 
 #include <winsock2.h>
+#include <pthread.h>
 
 typedef struct
 {
@@ -43,6 +44,7 @@ typedef struct
     size_t stack_size;
     int detach_state;
     int inherit_sched;
+    struct sched_param param;
 } arch_attr_t;
 
 struct arch_thread_cleanup_node {
