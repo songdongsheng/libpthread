@@ -42,19 +42,19 @@ int main(int argc, char *argv[])
 {
     int rc, i = 0;
     void * result;
-    pthread_t t;
+    pthread_t t[120];
 
-    while (i++ < 120) {
-        rc = pthread_create(&t, NULL, wroker, NULL);
+    while (i < sizeof(t) / sizeof(t[0])) {
+        rc = pthread_create(&t[i], NULL, wroker, NULL);
         assert(rc == 0);
+        i++;
+    }
 
-        /* printf("[%03d] rc: %d, t: %p\n", i, rc, t); */
-
-        rc = pthread_join(t, &result);
+    for(i = 0; i < sizeof(t) / sizeof(t[0]); i++) {
+        rc = pthread_join(t[i], &result);
         assert(rc == 0);
         assert(result == NULL);
     }
-
     printf("pthread_once passed\n");
     return 0;
 }
