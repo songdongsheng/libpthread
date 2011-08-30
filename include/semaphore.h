@@ -43,8 +43,18 @@ typedef void    *sem_t;
     #define PTHREAD_PROCESS_SHARED      1
 #endif
 
-#define SEM_VALUE_MAX   INT_MAX
-#define SEM_FAILED      NULL
+/* We support POSIX.1b semaphores.  */
+#ifndef _POSIX_SEMAPHORES
+#define _POSIX_SEMAPHORES       200809L
+#endif
+
+#ifndef SEM_VALUE_MAX
+#define SEM_VALUE_MAX           INT_MAX
+#endif
+
+#ifndef SEM_FAILED
+#define SEM_FAILED              NULL
+#endif
 
 int sem_init(sem_t * sem, int pshared, unsigned int value);
 int sem_wait(sem_t *sem);

@@ -36,6 +36,46 @@
 extern "C" {
 #endif
 
+/* We have POSIX timers.  */
+#ifndef _POSIX_TIMERS
+#define _POSIX_TIMERS           200809L
+#endif
+
+/* The monotonic clock might be available.  */
+#ifndef _POSIX_MONOTONIC_CLOCK
+#define _POSIX_MONOTONIC_CLOCK  0
+#endif
+
+/* The CPU-time clocks are available.  */
+#ifndef _POSIX_CPUTIME
+#define _POSIX_CPUTIME          200809L
+#endif
+
+/* The Clock support in threads are available.  */
+#ifndef _POSIX_THREAD_CPUTIME
+#define _POSIX_THREAD_CPUTIME   200809L
+#endif
+
+#ifndef TIMER_ABSTIME
+#define TIMER_ABSTIME           1
+#endif
+
+#ifndef CLOCK_REALTIME
+#define CLOCK_REALTIME              0
+#endif
+
+#ifndef CLOCK_MONOTONIC
+#define CLOCK_MONOTONIC             1
+#endif
+
+#ifndef CLOCK_PROCESS_CPUTIME_ID
+#define CLOCK_PROCESS_CPUTIME_ID    2
+#endif
+
+#ifndef CLOCK_THREAD_CPUTIME_ID
+#define CLOCK_THREAD_CPUTIME_ID     3
+#endif
+
 int nanosleep(const struct timespec *request, struct timespec *remain);
 
 int clock_getres(clockid_t clock_id, struct timespec *res);

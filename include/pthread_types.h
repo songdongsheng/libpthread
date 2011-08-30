@@ -111,18 +111,6 @@ typedef int clockid_t;
 #define __clockid_t_defined     1
 #endif  /* __clockid_t_defined */
 
-#ifndef CLOCK_REALTIME
-#define CLOCK_REALTIME  0
-#endif
-
-#ifndef CLOCK_MONOTONIC
-#define CLOCK_MONOTONIC 1
-#endif
-
-#ifndef TIMER_ABSTIME
-#define TIMER_ABSTIME  1
-#endif
-
 #ifndef _TIMESPEC_DEFINED
 struct timespec {
   time_t  tv_sec;       /* Seconds */

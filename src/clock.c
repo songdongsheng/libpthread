@@ -38,10 +38,12 @@ extern __int64 libpthread_hpet_frequency;
  * @param  clock_id The clock_id argument is the identifier of the particular
  *         clock on which to act. libpthread support the following clocks:
  * <pre>
- *     CLOCK_REALTIME System-wide real-time clock. Setting this clock
+ *     CLOCK_REALTIME  System-wide real-time clock. Setting this clock
  *                 requires appropriate privileges.
  *     CLOCK_MONOTONIC Clock that cannot be set and represents monotonic
  *                 time since some unspecified starting point.
+ *     CLOCK_PROCESS_CPUTIME_ID High-resolution per-process timer from the CPU.
+ *     CLOCK_THREAD_CPUTIME_ID  Thread-specific CPU-time clock.
  * </pre>
  * @param  res The pointer to a timespec structure to receive the time
  *         resolution.
@@ -51,11 +53,7 @@ extern __int64 libpthread_hpet_frequency;
  */
 int clock_getres(clockid_t clock_id, struct timespec *res)
 {
-    if (clock_id == CLOCK_REALTIME) {
-        res->tv_sec = libpthread_time_increment / POW10_7;
-        res->tv_nsec = ((int)(libpthread_time_increment % POW10_7)) * POW10_2;
-        return 0;
-    } else if (clock_id == CLOCK_MONOTONIC) {
+    if (clock_id == CLOCK_MONOTONIC) {
         if (libpthread_hpet_frequency < 1000)
             return set_errno(EINVAL);
 
@@ -63,6 +61,11 @@ int clock_getres(clockid_t clock_id, struct timespec *res)
         res->tv_nsec = (int) ((POW10_9 + (libpthread_hpet_frequency >> 1)) / libpthread_hpet_frequency);
         if (res->tv_nsec < 1)
             res->tv_nsec = 1;
+
+        return 0;
+    } else { /* CLOCK_REALTIME, CLOCK_PROCESS_CPUTIME_ID, CLOCK_THREAD_CPUTIME_ID */
+        res->tv_sec = libpthread_time_increment / POW10_7;
+        res->tv_nsec = ((int)(libpthread_time_increment % POW10_7)) * POW10_2;
 
         return 0;
     }
@@ -76,10 +79,12 @@ int clock_getres(clockid_t clock_id, struct timespec *res)
  * @param  clock_id The clock_id argument is the identifier of the particular
  *         clock on which to act. libpthread support the following clocks:
  * <pre>
- *     CLOCK_REALTIME System-wide real-time clock. Setting this clock
+ *     CLOCK_REALTIME  System-wide real-time clock. Setting this clock
  *                 requires appropriate privileges.
  *     CLOCK_MONOTONIC Clock that cannot be set and represents monotonic
  *                 time since some unspecified starting point.
+ *     CLOCK_PROCESS_CPUTIME_ID High-resolution per-process timer from the CPU.
+ *     CLOCK_THREAD_CPUTIME_ID  Thread-specific CPU-time clock.
  * </pre>
  * @param  tp The pointer to a timespec structure to receive the time.
  * @return If the function succeeds, the return value is 0.
@@ -96,6 +101,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
         t = (((__int64) ft.dwHighDateTime) << 32 | ft.dwLowDateTime) - DELTA_EPOCH_IN_100NS;
         tp->tv_sec = t / POW10_7;
         tp->tv_nsec = ((int) (t % POW10_7)) * 100;
+
         return 0;
     } else if (clock_id == CLOCK_MONOTONIC) {
         LARGE_INTEGER performanceCount;
@@ -109,6 +115,26 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
             tp->tv_sec ++;
             tp->tv_nsec -= POW10_9;
         }
+
+        return 0;
+    } else if (clock_id == CLOCK_PROCESS_CPUTIME_ID) {
+        FILETIME ct, et, kt, ut;
+        if(0 == GetProcessTimes(GetCurrentProcess(), &ct, &et, &kt, &ut))
+            return set_errno(EINVAL);
+        t = (((__int64) kt.dwHighDateTime) << 32 | kt.dwLowDateTime) +
+            (((__int64) ut.dwHighDateTime) << 32 | ut.dwLowDateTime);
+        tp->tv_sec = t / POW10_7;
+        tp->tv_nsec = ((int) (t % POW10_7)) * 100;
+
+        return 0;
+    } else if (clock_id == CLOCK_THREAD_CPUTIME_ID) {
+        FILETIME ct, et, kt, ut;
+        if(0 == GetThreadTimes(GetCurrentThread(), &ct, &et, &kt, &ut))
+            return set_errno(EINVAL);
+        t = (((__int64) kt.dwHighDateTime) << 32 | kt.dwLowDateTime) +
+            (((__int64) ut.dwHighDateTime) << 32 | ut.dwLowDateTime);
+        tp->tv_sec = t / POW10_7;
+        tp->tv_nsec = ((int) (t % POW10_7)) * 100;
 
         return 0;
     }

@@ -43,6 +43,41 @@
 extern "C" {
 #endif
 
+/* Tell we have POSIX threads.  */
+#ifndef _POSIX_THREADS
+#define _POSIX_THREADS          200809L
+#endif
+
+/* We support spinlocks.  */
+#ifndef _POSIX_SPIN_LOCKS
+#define _POSIX_SPIN_LOCKS       200809L
+#endif
+
+/* The barrier functions are available.  */
+#ifndef _POSIX_BARRIERS
+#define _POSIX_BARRIERS         200809L
+#endif
+
+/* Reader/Writer locks are available.  */
+#ifndef _POSIX_READER_WRITER_LOCKS
+#define _POSIX_READER_WRITER_LOCKS  200809L
+#endif
+
+/* We support the Timeouts option.  */
+#ifndef _POSIX_TIMEOUTS
+#define _POSIX_TIMEOUTS         200809L
+#endif
+
+/* We support user-defined stack sizes.  */
+#ifndef _POSIX_THREAD_ATTR_STACKSIZE
+#define _POSIX_THREAD_ATTR_STACKSIZE            200809L
+#endif
+
+/* We provide priority scheduling for threads.  */
+#ifndef _POSIX_THREAD_PRIORITY_SCHEDULING
+#define _POSIX_THREAD_PRIORITY_SCHEDULING       200809L
+#endif
+
 #define PTHREAD_KEYS_MAX            1024
 
 #define PTHREAD_PROCESS_PRIVATE     0

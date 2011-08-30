@@ -183,7 +183,7 @@ int pthread_attr_setschedparam(pthread_attr_t *attr, const struct sched_param *p
  * @param  param The scheduling parameter.
  * @return Always return 0.
  */
-int pthread_attr_getschedparam(pthread_attr_t *attr, struct sched_param *param)
+int pthread_attr_getschedparam(const pthread_attr_t *attr, struct sched_param *param)
 {
     arch_attr_t *pv = (arch_attr_t *) attr;
     param->sched_priority = pv->sched_param.sched_priority;

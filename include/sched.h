@@ -36,6 +36,11 @@
 extern "C" {
 #endif
 
+/* Priority scheduling is supported.  */
+#ifndef _POSIX_PRIORITY_SCHEDULING
+#define _POSIX_PRIORITY_SCHEDULING              200809L
+#endif
+
 #define SCHED_OTHER     0 /* NORMAL_PRIORITY_CLASS */
 #define SCHED_FIFO      1
 #define SCHED_RR        2

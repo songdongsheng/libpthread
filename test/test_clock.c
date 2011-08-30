@@ -60,12 +60,23 @@ int main(int argc, char *argv[])
     clock_gettime(CLOCK_REALTIME, &now);
     printf("[%"PRId64".%09d] clock_nanosleep passed\n", (__int64) now.tv_sec, (int) now.tv_nsec);
 
-    request.tv_sec = 3 + now.tv_sec;
+    request.tv_sec = 2 + now.tv_sec;
     request.tv_nsec = 0;
     rc = clock_nanosleep(CLOCK_REALTIME, 1, &request, NULL);
     assert(rc == 0);
     clock_gettime(CLOCK_REALTIME, &now);
     printf("[%"PRId64".%09d] clock_nanosleep passed 2\n", (__int64) now.tv_sec, (int) now.tv_nsec);
+
+    for(rc = 0; rc < 99999999; rc++)
+        YieldProcessor();
+
+    rc = clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &m2);
+    assert(rc == 0);
+    printf("[%"PRId64".%09d] clock_gettime (CLOCK_PROCESS_CPUTIME_ID) passed\n", (__int64) m2.tv_sec, (int) m2.tv_nsec);
+
+    rc = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &m2);
+    assert(rc == 0);
+    printf("[%"PRId64".%09d] clock_gettime (CLOCK_THREAD_CPUTIME_ID) passed\n", (__int64) m2.tv_sec, (int) m2.tv_nsec);
 
     return 0;
 }
