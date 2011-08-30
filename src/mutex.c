@@ -191,10 +191,13 @@ static int arch_mutex_init(pthread_mutex_t *m, int lock)
     if (pv == NULL)
         return set_errno(ENOMEM);
 
-    if (!lock)
-        return 0;
-
     InitializeCriticalSection(& pv->mutex);
+
+    if (!lock) {
+        *m = pv;
+        return 0;
+    }
+
     if (atomic_cmpxchg_ptr(m, pv, NULL) != NULL) {
         DeleteCriticalSection(& pv->mutex);
         free(pv);
