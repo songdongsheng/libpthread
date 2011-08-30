@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     printf("static pthread_mutex_lock passed\n");
 
     rc = pthread_mutex_trylock(&g_mutex);
-    assert(rc == 0);
+    assert(rc == EBUSY);
     printf("static pthread_mutex_trylock passed\n");
 
     rc = pthread_mutex_unlock(&g_mutex);
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     printf("pthread_mutex_lock passed\n");
 
     rc = pthread_mutex_trylock(&g_mutex);
-    assert(rc == 0);
+    assert(rc == EBUSY);
     printf("pthread_mutex_trylock passed\n");
 
     rc = pthread_mutex_unlock(&mutex);

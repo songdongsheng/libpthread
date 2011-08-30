@@ -42,7 +42,7 @@ int pthread_mutexattr_init(pthread_mutexattr_t *attr)
 {
     arch_mutex_attr *pv = calloc(1, sizeof(arch_mutex_attr));
     if (pv == NULL)
-        return set_errno(ENOMEM);
+        return ENOMEM;
 
     pv->type = PTHREAD_MUTEX_DEFAULT;
     pv->pshared = PTHREAD_PROCESS_PRIVATE;
@@ -105,9 +105,6 @@ int pthread_mutexattr_getpshared(const pthread_mutexattr_t *attr, int *pshared)
  */
 int pthread_mutexattr_setpshared(pthread_mutexattr_t *attr, int pshared)
 {
-    if (pshared != PTHREAD_PROCESS_PRIVATE)
-        return set_errno(EINVAL);
-
     arch_mutex_attr *pv = (arch_mutex_attr *) attr;
     pv->pshared = pshared;
     return 0;
@@ -189,9 +186,12 @@ static int arch_mutex_init(pthread_mutex_t *m, int lock)
 {
     arch_mutex *pv = calloc(1, sizeof(arch_mutex));
     if (pv == NULL)
-        return set_errno(ENOMEM);
+        return ENOMEM;
 
-    InitializeCriticalSection(& pv->mutex);
+    pv->cpu_count = get_ncpu();
+
+    /* see test_speed, about 1/2 the system call*/
+    if (pv->cpu_count > 1) pv->spin_count = 32;
 
     if (!lock) {
         *m = pv;
@@ -199,11 +199,45 @@ static int arch_mutex_init(pthread_mutex_t *m, int lock)
     }
 
     if (atomic_cmpxchg_ptr(m, pv, NULL) != NULL) {
-        DeleteCriticalSection(& pv->mutex);
         free(pv);
     }
 
     return 0;
+}
+
+static __inline int spin_lock_with_count(volatile long *lock, int count)
+{
+    int i = 0;
+
+    do {
+        if(atomic_cmpxchg((volatile long *) lock, 1, 0) == 0)
+            return 1;
+        cpu_relax();
+    } while(++i < count);
+
+    return 0;
+}
+
+static __inline void spin_unlock(volatile long *lock)
+{
+    *lock = 0;
+}
+
+extern DWORD libpthread_time_increment;
+static __inline void arch_mutex_init_handle(HANDLE *sync)
+{
+    HANDLE handle;
+
+    while(*sync == NULL) {
+        handle = CreateEvent(NULL, FALSE, FALSE, NULL);
+        if (handle != NULL) {
+            if(atomic_cmpxchg_ptr(sync, handle, NULL) != NULL)
+                CloseHandle(handle);
+            return;
+        } else {
+            Sleep(libpthread_time_increment);
+        }
+    }
 }
 
 /**
@@ -227,7 +261,7 @@ int pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a)
  * @param m The pointer of the mutex object.
  * @return If the function succeeds, the return value is 0.
  *         If the function fails, the return value is -1,
- *         with errno set to indicate the error (ENOMEM).
+ *         with errno set to indicate the error (ENOMEM, EDEADLK).
  */
 int pthread_mutex_lock(pthread_mutex_t *m)
 {
@@ -239,7 +273,20 @@ int pthread_mutex_lock(pthread_mutex_t *m)
     }
 
     pv = (arch_mutex *) *m;
-    EnterCriticalSection(& pv->mutex);
+
+    while(1) {
+        if (spin_lock_with_count(& pv->lock_status, pv->spin_count)) {
+            pv->thread_id = GetCurrentThreadId();
+            return 0;
+        }
+
+        if (pv->sync == NULL)
+            arch_mutex_init_handle(& pv->sync);
+
+        atomic_inc(& pv->wait);
+        WaitForSingleObject(pv->sync, INFINITE);
+        atomic_dec(& pv->wait);
+    }
 
     return 0;
 }
@@ -261,10 +308,13 @@ int pthread_mutex_trylock(pthread_mutex_t *m)
     }
 
     pv = (arch_mutex *) *m;
-    if( 0 != TryEnterCriticalSection(& pv->mutex))
-        return 0;
 
-    return set_errno(EBUSY);
+    if (spin_lock_with_count(& pv->lock_status, pv->spin_count)) {
+        pv->thread_id = GetCurrentThreadId();
+        return 0;
+    }
+
+    return EBUSY;
 }
 
 /**
@@ -278,11 +328,14 @@ int pthread_mutex_unlock(pthread_mutex_t *m)
 {
     arch_mutex *pv = (arch_mutex *) *m;
     if (pv != NULL) {
-        LeaveCriticalSection(& pv->mutex);
+        spin_unlock(& pv->lock_status);
+        pv->thread_id = 0;
+        if (*((long volatile *) & pv->wait) != 0)
+            SetEvent(pv->sync);
         return 0;
     }
 
-    return set_errno(EINVAL);
+    return EINVAL;
 }
 
 /**
@@ -294,7 +347,7 @@ int pthread_mutex_destroy(pthread_mutex_t *m)
 {
     arch_mutex *pv = (arch_mutex *) *m;
     if (pv != NULL) {
-        DeleteCriticalSection(& pv->mutex);
+        if (pv->sync != NULL) CloseHandle(pv->sync);
         free(pv);
     }
 

@@ -33,7 +33,7 @@
 
 #ifdef _MSC_VER
 #include <intrin.h>
-#pragma intrinsic(_InterlockedCompareExchange, _mm_pause)
+#pragma intrinsic(_InterlockedCompareExchange, _InterlockedDecrement, _InterlockedIncrement, _mm_pause)
 
 #ifdef _WIN64
 #pragma intrinsic(_InterlockedCompareExchangePointer)
@@ -205,6 +205,24 @@ static __inline void cpu_relax(void)
  * http://msdn.microsoft.com/en-us/library/7kcdt6fy.aspx [x64 Software Conventions, RAX, (RCX, RDX, R8, R9), R10, R11]
  * http://msdn.microsoft.com/zh-cn/library/26td21ds.aspx [Compiler Intrinsics]
  */
+static __inline long atomic_inc(long volatile *__ptr)
+{
+#ifdef _MSC_VER
+    return _InterlockedIncrement(__ptr);
+#else
+    return __sync_add_and_fetch(__ptr, 1);
+#endif
+}
+
+static __inline long atomic_dec(long volatile *__ptr)
+{
+#ifdef _MSC_VER
+    return _InterlockedDecrement(__ptr);
+#else
+    return __sync_add_and_fetch(__ptr, -1);
+#endif
+}
+
 static __inline long atomic_cmpxchg(long volatile *__ptr, long __new, long __old)
 {
 #ifdef _MSC_VER
@@ -239,6 +257,21 @@ static __inline void *atomic_cmpxchg_ptr(void * volatile *__ptr, void *__new, vo
   return prev;
  */
 #endif
+}
+
+static int __inline get_ncpu()
+{
+    int n = 0;
+    DWORD_PTR pm, sm;
+
+    if (GetProcessAffinityMask(GetCurrentProcess(), &pm, &sm)) {
+        while(pm > 0) {
+            n += pm & 1;
+            pm >>= 1;
+        }
+    }
+
+    return n > 0 ? n : 1;
 }
 
 /** @} */

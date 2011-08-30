@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2011, Dongsheng Song <songdongsheng@live.cn>
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,6 +23,8 @@
 #include <winsock2.h>
 #include <pthread.h>
 #include <pthread_clock.h>
+
+#include "../src/misc.h"
 
 #define TEST_TIMES  1000000
 #define POW10_9     INT64_C(1000000000)
@@ -112,12 +132,111 @@ void test_sem()
     fprintf(stdout, "    ReleaseSemaphore/WaitForSingleObject: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
 }
 
+void test_lps()
+{
+    int i;
+    struct timespec tp, tp2;
+    HANDLE handle = CreateSemaphore(NULL, 0, 1, NULL);
+
+    clock_gettime(CLOCK_MONOTONIC, &tp);
+    for(i = 0; i < TEST_TIMES; i++) {
+        get_ncpu();
+    }
+    clock_gettime(CLOCK_MONOTONIC, &tp2);
+
+    CloseHandle(handle);
+
+    fprintf(stdout, "                                get_ncpu: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
+}
+
+void test_spin()
+{
+    int i;
+    struct timespec tp, tp2;
+    pthread_spinlock_t lock = PTHREAD_SPINLOCK_INITIALIZER;
+
+    pthread_spin_lock(&lock);
+    pthread_spin_unlock(&lock);
+
+    clock_gettime(CLOCK_MONOTONIC, &tp);
+    for(i = 0; i < TEST_TIMES; i++) {
+        pthread_spin_lock(&lock);
+        pthread_spin_unlock(&lock);
+    }
+    clock_gettime(CLOCK_MONOTONIC, &tp2);
+
+    fprintf(stdout, "   pthread_spin_lock/pthread_spin_unlock: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
+}
+
+#ifdef _MSC_VER
+void spin_count(int count)
+#else
+void __attribute__ ((noinline)) spin_count(int count)
+#endif
+{
+    long i = 0, lock = 0;
+
+    while(i++<count) {
+        atomic_cmpxchg((volatile long *) &lock, 1, 0);
+        cpu_relax();
+    }
+}
+
+void test_spin_count()
+{
+    int i;
+    struct timespec tp, tp2;
+
+    spin_count(32);
+
+    clock_gettime(CLOCK_MONOTONIC, &tp);
+    for(i = 0; i < TEST_TIMES; i++) {
+        spin_count(32);
+    }
+    clock_gettime(CLOCK_MONOTONIC, &tp2);
+
+    fprintf(stdout, "   pthread_spin_lock/pthread_spin_unlock: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
+}
+
+void test_mutex()
+{
+    int i;
+    long rc;
+    pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    struct timespec tp, tp2;
+
+    rc = pthread_mutex_lock(&mutex);
+    if (rc != 0) {
+        fprintf(stderr, "pthread_mutex_lock failed: %ld\n", rc);
+        exit(1);
+    }
+
+    rc = pthread_mutex_unlock(&mutex);
+    if (rc != 0) {
+        fprintf(stderr, "pthread_mutex_unlock failed: %ld\n", rc);
+        exit(1);
+    }
+
+    clock_gettime(CLOCK_MONOTONIC, &tp);
+    for(i = 0; i < TEST_TIMES; i++) {
+        pthread_mutex_lock(&mutex);
+        pthread_mutex_unlock(&mutex);
+    }
+    clock_gettime(CLOCK_MONOTONIC, &tp2);
+
+    fprintf(stdout, " pthread_mutex_lock/pthread_mutex_unlock: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
+}
+
 int main(int argc, char *argv[])
 {
     struct timespec tp;
 
     clock_gettime(CLOCK_MONOTONIC, &tp);
 
+    test_mutex();
+    test_spin_count();
+    test_spin();
+    test_lps();
     test_sem();
     test_evt();
     test_tid();

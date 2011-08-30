@@ -100,7 +100,12 @@ typedef struct {
 } arch_mutex_attr;
 
 typedef struct {
-    CRITICAL_SECTION mutex;
+    long wait;
+    long lock_status; /* 0:unlocked, 1:locked */
+    long thread_id; /* debug only */
+    long cpu_count;
+    long spin_count;
+    HANDLE sync;
 } arch_mutex;
 
 typedef struct {
