@@ -126,16 +126,15 @@ typedef unsigned long pthread_once_t;
 typedef unsigned long pthread_key_t;
 typedef unsigned long pthread_spinlock_t;
 
-typedef unsigned long pthread_mutexattr_t;
-typedef unsigned long pthread_condattr_t;
-typedef unsigned long pthread_rwlockattr_t;
+typedef void    *pthread_mutexattr_t;
+typedef void    *pthread_condattr_t;
+typedef void    *pthread_rwlockattr_t;
+typedef void    *pthread_barrierattr_t;
 
 typedef void    *pthread_mutex_t;
 typedef void    *pthread_cond_t;
 typedef void    *pthread_rwlock_t;
-
 typedef void    *pthread_barrier_t;
-typedef void    *pthread_barrierattr_t;
 
 /*
     #include <signal.h>

@@ -39,6 +39,14 @@ typedef struct
     HANDLE handle;
 } arch_sem_t;
 
+struct arch_thread_cleanup_node {
+    void (* cleaner)(void *);
+    void *arg;
+    struct arch_thread_cleanup_node *next, *prev;
+};
+
+typedef struct arch_thread_cleanup_node arch_thread_cleanup_list;
+
 typedef struct
 {
     int detach_state;
@@ -49,15 +57,7 @@ typedef struct
     int scope;
     void *stack_addr;
     size_t stack_size;
-} arch_attr_t;
-
-struct arch_thread_cleanup_node {
-    void (* cleaner)(void *);
-    void *arg;
-    struct arch_thread_cleanup_node *next, *prev;
-};
-
-typedef struct arch_thread_cleanup_node arch_thread_cleanup_list;
+} arch_thread_attr;
 
 typedef struct {
     HANDLE handle;
@@ -68,26 +68,31 @@ typedef struct {
     arch_thread_cleanup_list *cleanup_list;
 } arch_thread_info;
 
-typedef struct {
-    unsigned int state;
-    unsigned int stack_size;
-    int priority;
-} arch_thread_attr;
+/*
+    On 32-bit OS:
+    sizeof(pthread_attr_t): 4
+    sizeof(CRITICAL_SECTION): 24
+    sizeof(SRWLOCK): 4
+    sizeof(CONDITION_VARIABLE): 4
 
-/* sizeof(CRITICAL_SECTION): 24 */
+    On 64-bit OS:
+    sizeof(pthread_attr_t): 8
+    sizeof(CRITICAL_SECTION): 40
+    sizeof(SRWLOCK): 8
+    sizeof(CONDITION_VARIABLE): 8
+ */
+
 typedef struct {
     CRITICAL_SECTION mutex;
 } arch_thread_mutex;
 
-/* sizeof(SRWLOCK): 4 */
 typedef struct {
     char rwlock[8]; /* InitializeSRWLock */
-} arch_thread_rwlock;
+} arch_rwlock;
 
-/* sizeof(CONDITION_VARIABLE): 4 */
 typedef struct {
     char cond[8]; /* InitializeConditionVariable */
-} arch_thread_cond;
+} arch_cond;
 
 /** @} */
 

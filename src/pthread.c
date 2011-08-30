@@ -76,7 +76,7 @@ int pthread_setconcurrency(int new_level)
  */
 int pthread_attr_init(pthread_attr_t *attr)
 {
-    arch_attr_t *pv = calloc(1, sizeof(arch_attr_t));
+    arch_thread_attr *pv = calloc(1, sizeof(arch_thread_attr));
     if (pv == NULL)
         return set_errno(ENOMEM);
 
@@ -96,7 +96,7 @@ int pthread_attr_init(pthread_attr_t *attr)
  */
 int pthread_attr_getdetachstate(const pthread_attr_t *attr, int *flag)
 {
-    arch_attr_t *pv = (arch_attr_t *) attr;
+    arch_thread_attr *pv = (arch_thread_attr *) attr;
     *flag = pv->detach_state;
     return 0;
 }
@@ -109,7 +109,7 @@ int pthread_attr_getdetachstate(const pthread_attr_t *attr, int *flag)
  */
 int pthread_attr_setdetachstate(pthread_attr_t *attr, int flag)
 {
-    arch_attr_t *pv = (arch_attr_t *) attr;
+    arch_thread_attr *pv = (arch_thread_attr *) attr;
     pv->detach_state = flag;
     return 0;
 }
@@ -121,7 +121,7 @@ int pthread_attr_setdetachstate(pthread_attr_t *attr, int flag)
  */
 int pthread_attr_getguardsize(const pthread_attr_t *attr, size_t *size)
 {
-    arch_attr_t *pv = (arch_attr_t *) attr;
+    arch_thread_attr *pv = (arch_thread_attr *) attr;
     *size = pv->guard_size;
     return 0;
 }
@@ -133,7 +133,7 @@ int pthread_attr_getguardsize(const pthread_attr_t *attr, size_t *size)
  */
 int pthread_attr_setguardsize(pthread_attr_t *attr, size_t size)
 {
-    arch_attr_t *pv = (arch_attr_t *) attr;
+    arch_thread_attr *pv = (arch_thread_attr *) attr;
     pv->guard_size = size;
     return 0;
 }
@@ -146,7 +146,7 @@ int pthread_attr_setguardsize(pthread_attr_t *attr, size_t size)
  */
 int pthread_attr_getinheritsched(const pthread_attr_t *attr, int *flag)
 {
-    arch_attr_t *pv = (arch_attr_t *) attr;
+    arch_thread_attr *pv = (arch_thread_attr *) attr;
     *flag = pv->inherit_sched;
     return 0;
 }
@@ -159,7 +159,7 @@ int pthread_attr_getinheritsched(const pthread_attr_t *attr, int *flag)
  */
 int pthread_attr_setinheritsched(pthread_attr_t *attr, int flag)
 {
-    arch_attr_t *pv = (arch_attr_t *) attr;
+    arch_thread_attr *pv = (arch_thread_attr *) attr;
     pv->inherit_sched = flag;
     return 0;
 }
@@ -172,7 +172,7 @@ int pthread_attr_setinheritsched(pthread_attr_t *attr, int flag)
  */
 int pthread_attr_setschedparam(pthread_attr_t *attr, const struct sched_param *param)
 {
-    arch_attr_t *pv = (arch_attr_t *) attr;
+    arch_thread_attr *pv = (arch_thread_attr *) attr;
     pv->sched_param.sched_priority = param->sched_priority;
     return 0;
 }
@@ -185,7 +185,7 @@ int pthread_attr_setschedparam(pthread_attr_t *attr, const struct sched_param *p
  */
 int pthread_attr_getschedparam(const pthread_attr_t *attr, struct sched_param *param)
 {
-    arch_attr_t *pv = (arch_attr_t *) attr;
+    arch_thread_attr *pv = (arch_thread_attr *) attr;
     param->sched_priority = pv->sched_param.sched_priority;
     return 0;
 }
@@ -199,7 +199,7 @@ int pthread_attr_getschedparam(const pthread_attr_t *attr, struct sched_param *p
  */
 int pthread_attr_getschedpolicy(const pthread_attr_t *attr, int *policy)
 {
-    arch_attr_t *pv = (arch_attr_t *) attr;
+    arch_thread_attr *pv = (arch_thread_attr *) attr;
     *policy = pv->sched_policy;
     return 0;
 }
@@ -213,7 +213,7 @@ int pthread_attr_getschedpolicy(const pthread_attr_t *attr, int *policy)
  */
 int pthread_attr_setschedpolicy(pthread_attr_t *attr, int policy)
 {
-    arch_attr_t *pv = (arch_attr_t *) attr;
+    arch_thread_attr *pv = (arch_thread_attr *) attr;
     pv->sched_policy = policy;
     return 0;
 }
@@ -227,7 +227,7 @@ int pthread_attr_setschedpolicy(pthread_attr_t *attr, int policy)
  */
 int pthread_attr_getscope(const pthread_attr_t *attr, int *scope)
 {
-    arch_attr_t *pv = (arch_attr_t *) attr;
+    arch_thread_attr *pv = (arch_thread_attr *) attr;
     *scope = pv->scope;
     return 0;
 }
@@ -241,7 +241,7 @@ int pthread_attr_getscope(const pthread_attr_t *attr, int *scope)
  */
 int pthread_attr_setscope(pthread_attr_t *attr, int scope)
 {
-    arch_attr_t *pv = (arch_attr_t *) attr;
+    arch_thread_attr *pv = (arch_thread_attr *) attr;
     pv->scope = scope;
     return 0;
 }
@@ -256,7 +256,7 @@ int pthread_attr_setscope(pthread_attr_t *attr, int scope)
  */
 int pthread_attr_getstack(const pthread_attr_t *attr, void **addr, size_t *size)
 {
-    arch_attr_t *pv = (arch_attr_t *) attr;
+    arch_thread_attr *pv = (arch_thread_attr *) attr;
 
     if (addr != NULL) *addr = pv->stack_addr;
     if (size != NULL) *size = pv->stack_size;
@@ -274,7 +274,7 @@ int pthread_attr_getstack(const pthread_attr_t *attr, void **addr, size_t *size)
  */
 int pthread_attr_setstack(pthread_attr_t *attr, void *addr, size_t size)
 {
-    arch_attr_t *pv = (arch_attr_t *) attr;
+    arch_thread_attr *pv = (arch_thread_attr *) attr;
 
     pv->stack_addr = addr;
     pv->stack_size = size;
@@ -290,7 +290,7 @@ int pthread_attr_setstack(pthread_attr_t *attr, void *addr, size_t size)
  */
 int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *size)
 {
-    arch_attr_t *pv = (arch_attr_t *) *attr;
+    arch_thread_attr *pv = (arch_thread_attr *) *attr;
     *size = pv->stack_size;
     return 0;
 }
@@ -303,7 +303,7 @@ int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *size)
  */
 int pthread_attr_setstacksize(pthread_attr_t *attr, size_t size)
 {
-    arch_attr_t *pv = (arch_attr_t *) attr;
+    arch_thread_attr *pv = (arch_thread_attr *) attr;
     pv->stack_size = size;
     return 0;
 }
@@ -516,7 +516,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_
     if (pv == NULL)
         return set_errno(ENOMEM);
 
-    if (attr != NULL) stack_size = ((arch_attr_t * ) attr)->stack_size;
+    if (attr != NULL) stack_size = ((arch_thread_attr * ) attr)->stack_size;
 
     pv->arg = arg;
     pv->worker = start_routine;
@@ -529,9 +529,9 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_
     }
 
     if (attr != NULL) {
-        SetThreadPriority(pv->handle, sched_priority_to_os_priority(((arch_attr_t * ) attr)->sched_param.sched_priority));
+        SetThreadPriority(pv->handle, sched_priority_to_os_priority(((arch_thread_attr * ) attr)->sched_param.sched_priority));
 
-        if ((((arch_attr_t * ) attr)->detach_state & PTHREAD_CREATE_DETACHED) != 0) {
+        if ((((arch_thread_attr * ) attr)->detach_state & PTHREAD_CREATE_DETACHED) != 0) {
             CloseHandle(pv->handle);
             pv->state = PTHREAD_CREATE_DETACHED;
             pv->handle = NULL;
