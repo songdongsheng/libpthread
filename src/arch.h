@@ -83,16 +83,53 @@ typedef struct {
  */
 
 typedef struct {
-    CRITICAL_SECTION mutex;
-} arch_thread_mutex;
+    /*
+     * PTHREAD_MUTEX_NORMAL, PTHREAD_MUTEX_ERRORCHECK,
+     * PTHREAD_MUTEX_RECURSIVE, or PTHREAD_MUTEX_DEFAULT
+     */
+    int type;
+
+    /* PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED */
+    int pshared;
+
+    /* PTHREAD_PRIO_NONE, PTHREAD_PRIO_INHERIT or PTHREAD_PRIO_PROTECT */
+    int protocol;
+
+    /* from __sched_fifo_min_prio to __sched_fifo_max_prio */
+    int prioceiling;
+} arch_mutex_attr;
 
 typedef struct {
-    char rwlock[8]; /* InitializeSRWLock */
-} arch_rwlock;
+    CRITICAL_SECTION mutex;
+} arch_mutex;
+
+typedef struct {
+    int pshared;
+} arch_barrier_attr;
+
+typedef struct {
+    int count;
+    int total;
+    int index;
+    HANDLE semaphore[2];
+} arch_barrier;
+
+typedef struct {
+    int pshared;
+    clockid_t *clock_id;
+} arch_cond_attr;
 
 typedef struct {
     char cond[8]; /* InitializeConditionVariable */
 } arch_cond;
+
+typedef struct {
+    int pshared;
+} arch_rwlock_attr;
+
+typedef struct {
+    char rwlock[8]; /* InitializeSRWLock */
+} arch_rwlock;
 
 /** @} */
 

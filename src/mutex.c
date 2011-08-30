@@ -33,141 +33,166 @@
 
 /**
  * Create a mutex attribute object.
- * @param a The pointer of the mutex attribute object.
+ * @param attr The pointer of the mutex attribute object.
  * @return Always return 0.
  * @remark We provide pthread_mutexattr_* functions only for compatibility,
  *         please use pthread_mutex_init(&mutex, NULL) for new applications.
  */
-int pthread_mutexattr_init(pthread_mutexattr_t *a)
+int pthread_mutexattr_init(pthread_mutexattr_t *attr)
 {
-    *a = 0;
+    arch_mutex_attr *pv = calloc(1, sizeof(arch_mutex_attr));
+    if (pv == NULL)
+        return set_errno(ENOMEM);
+
+    pv->type = PTHREAD_MUTEX_DEFAULT;
+    pv->pshared = PTHREAD_PROCESS_PRIVATE;
+
+    *attr = pv;
+
     return 0;
 }
 
 /**
  * Get the mutex type attribute.
- * @param a The pointer of the mutex attribute object.
+ * @param attr The pointer of the mutex attribute object.
  * @param type The mutex type.
  * @return Always return 0.
- * @remark We do not support mutex type attribute, this function does nothing.
+ * @remark This function is provided for source code compatibility but no effect when called.
  */
-int pthread_mutexattr_gettype(const pthread_mutexattr_t *a, int *type)
+int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type)
 {
-    *type = 0;
+    arch_mutex_attr *pv = (arch_mutex_attr *) attr;
+    *type = pv->type;
     return 0;
 }
 
 /**
  * Set the mutex type attribute.
- * @param a The pointer of the mutex attribute object.
+ * @param attr The pointer of the mutex attribute object.
  * @param type The mutex type.
  * @return Always return 0.
- * @remark We do not support mutex type attribute, this function does nothing.
+ * @remark This function is provided for source code compatibility but no effect when called.
  */
-int pthread_mutexattr_settype(pthread_mutexattr_t *a, int type)
+int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type)
 {
-    *a = 0;
+    arch_mutex_attr *pv = (arch_mutex_attr *) attr;
+    pv->type = type;
     return 0;
 }
 
 /**
  * Get the mutex process-shared attribute.
- * @param a The pointer of the mutex attribute object.
+ * @param attr The pointer of the mutex attribute object.
  * @param pshared The process-shared attribute.
  * @return Always return 0.
  * @remark The only type we support is PTHREAD_PROCESS_PRIVATE.
+ * @remark This function is provided for source code compatibility but no effect when called.
  */
-int pthread_mutexattr_getpshared(const pthread_mutexattr_t *a, int *pshared)
+int pthread_mutexattr_getpshared(const pthread_mutexattr_t *attr, int *pshared)
 {
-    *pshared = PTHREAD_PROCESS_PRIVATE;
+    arch_mutex_attr *pv = (arch_mutex_attr *) attr;
+    *pshared = pv->pshared;
     return 0;
 }
 
 /**
  * Set the mutex process-shared attribute.
- * @param a The pointer of the mutex attribute object.
+ * @param attr The pointer of the mutex attribute object.
  * @param pshared The process-shared attribute.
  * @return Always return 0.
  * @remark The only type we support is PTHREAD_PROCESS_PRIVATE.
+ * @remark This function is provided for source code compatibility but no effect when called.
  */
-int pthread_mutexattr_setpshared(pthread_mutexattr_t * a, int pshared)
+int pthread_mutexattr_setpshared(pthread_mutexattr_t *attr, int pshared)
 {
     if (pshared != PTHREAD_PROCESS_PRIVATE)
         return set_errno(EINVAL);
 
-    *a = 0;
+    arch_mutex_attr *pv = (arch_mutex_attr *) attr;
+    pv->pshared = pshared;
     return 0;
 }
 
 /**
  * Get the mutex protocol attribute.
- * @param a The pointer of the mutex attribute object.
+ * @param attr The pointer of the mutex attribute object.
  * @param protocol The mutex protocol.
  * @return Always return 0.
- * @remark We do not support mutex protocol attribute, this function does nothing.
+ * @remark This function is provided for source code compatibility but no effect when called.
  */
-int pthread_mutexattr_getprotocol(const pthread_mutexattr_t *a, int *protocol)
+int pthread_mutexattr_getprotocol(const pthread_mutexattr_t *attr, int *protocol)
 {
-    *protocol = 0;
+    arch_mutex_attr *pv = (arch_mutex_attr *) attr;
+    *protocol = pv->protocol;
     return 0;
 }
 
 /**
  * Set the mutex protocol attribute.
- * @param a The pointer of the mutex attribute object.
+ * @param attr The pointer of the mutex attribute object.
  * @param protocol The mutex protocol.
  * @return Always return 0.
- * @remark We do not support mutex protocol attribute, this function does nothing.
+ * @remark This function is provided for source code compatibility but no effect when called.
  */
-int pthread_mutexattr_setprotocol(pthread_mutexattr_t *a, int protocol)
+int pthread_mutexattr_setprotocol(pthread_mutexattr_t *attr, int protocol)
 {
-    *a = 0;
+    arch_mutex_attr *pv = (arch_mutex_attr *) attr;
+    pv->protocol = protocol;
     return 0;
 }
 
 /**
  * Get the mutex prioceiling attribute.
- * @param a The pointer of the mutex attribute object.
- * @param prio The mutex prioceiling attribute.
+ * @param attr The pointer of the mutex attribute object.
+ * @param prioceiling The mutex prioceiling attribute.
  * @return Always return 0.
- * @remark We do not support mutex prioceiling attribute, this function does nothing.
+ * @remark This function is provided for source code compatibility but no effect when called.
  */
-int pthread_mutexattr_getprioceiling(const pthread_mutexattr_t *a, int *prio)
+int pthread_mutexattr_getprioceiling(const pthread_mutexattr_t *attr, int *prioceiling)
 {
-    *prio = 0;
+    arch_mutex_attr *pv = (arch_mutex_attr *) attr;
+    *prioceiling = pv->prioceiling;
     return 0;
 }
 
 /**
  * Set the mutex prioceiling attribute.
- * @param a The pointer of the mutex attribute object.
- * @param prio The mutex prioceiling attribute.
+ * @param attr The pointer of the mutex attribute object.
+ * @param prioceiling The mutex prioceiling attribute.
  * @return Always return 0.
- * @remark We do not support mutex prioceiling attribute, this function does nothing.
+ * @remark This function is provided for source code compatibility but no effect when called.
  */
-int pthread_mutexattr_setprioceiling(pthread_mutexattr_t *a, int prio)
+int pthread_mutexattr_setprioceiling(pthread_mutexattr_t *attr, int prioceiling)
 {
-    *a = 0;
+    arch_mutex_attr *pv = (arch_mutex_attr *) attr;
+    pv->prioceiling = prioceiling;
     return 0;
 }
 
 /**
  * Destroy a mutex attribute object.
- * @param a The pointer of the mutex attribute object.
+ * @param attr The pointer of the mutex attribute object.
  * @return Always return 0.
- * @remark We do not support mutex attribute, all pthread_mutexattr_* functions does nothing.
+ * @remark This function is provided for source code compatibility but no effect when called.
  */
-int pthread_mutexattr_destroy(pthread_mutexattr_t *a)
+int pthread_mutexattr_destroy(pthread_mutexattr_t *attr)
 {
-    *a = 0;
+    if (attr != NULL) {
+        free(*attr);
+        *attr = NULL;
+    }
+
     return 0;
 }
 
-static int arch_mutex_init(pthread_mutex_t *m)
+static int arch_mutex_init(pthread_mutex_t *m, int lock)
 {
-    arch_thread_mutex *pv = calloc(1, sizeof(arch_thread_mutex));
+    arch_mutex *pv = calloc(1, sizeof(arch_mutex));
     if (pv == NULL)
         return set_errno(ENOMEM);
+
+    if (!lock)
+        return 0;
 
     InitializeCriticalSection(& pv->mutex);
     if (atomic_cmpxchg_ptr(m, pv, NULL) != NULL) {
@@ -191,7 +216,7 @@ static int arch_mutex_init(pthread_mutex_t *m)
 int pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a)
 {
     *m = NULL;
-    return arch_mutex_init(m);
+    return arch_mutex_init(m, 0);
 }
 
 /**
@@ -203,14 +228,14 @@ int pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a)
  */
 int pthread_mutex_lock(pthread_mutex_t *m)
 {
-    arch_thread_mutex *pv;
+    arch_mutex *pv;
 
     if (*m == NULL) {
-        int rc = arch_mutex_init(m);
+        int rc = arch_mutex_init(m, 1);
         if (rc != 0) return rc;
     }
 
-    pv = (arch_thread_mutex *) *m;
+    pv = (arch_mutex *) *m;
     EnterCriticalSection(& pv->mutex);
 
     return 0;
@@ -225,14 +250,14 @@ int pthread_mutex_lock(pthread_mutex_t *m)
  */
 int pthread_mutex_trylock(pthread_mutex_t *m)
 {
-    arch_thread_mutex *pv;
+    arch_mutex *pv;
 
     if (*m == NULL) {
-        int rc = arch_mutex_init(m);
+        int rc = arch_mutex_init(m, 1);
         if (rc != 0) return rc;
     }
 
-    pv = (arch_thread_mutex *) *m;
+    pv = (arch_mutex *) *m;
     if( 0 != TryEnterCriticalSection(& pv->mutex))
         return 0;
 
@@ -248,7 +273,7 @@ int pthread_mutex_trylock(pthread_mutex_t *m)
  */
 int pthread_mutex_unlock(pthread_mutex_t *m)
 {
-    arch_thread_mutex *pv = (arch_thread_mutex *) *m;
+    arch_mutex *pv = (arch_mutex *) *m;
     if (pv != NULL) {
         LeaveCriticalSection(& pv->mutex);
         return 0;
@@ -264,7 +289,7 @@ int pthread_mutex_unlock(pthread_mutex_t *m)
  */
 int pthread_mutex_destroy(pthread_mutex_t *m)
 {
-    arch_thread_mutex *pv = (arch_thread_mutex *) *m;
+    arch_mutex *pv = (arch_mutex *) *m;
     if (pv != NULL) {
         DeleteCriticalSection(& pv->mutex);
         free(pv);

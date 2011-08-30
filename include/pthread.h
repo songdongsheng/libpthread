@@ -224,9 +224,9 @@ int pthread_barrierattr_setpshared(void **attr, int s);
 int pthread_barrierattr_getpshared(void **attr, int *s);
 int pthread_barrierattr_destroy(void **attr);
 
-int pthread_barrier_init(pthread_barrier_t *b, const void *attr, unsigned int count);
-int pthread_barrier_wait(pthread_barrier_t *b);
-int pthread_barrier_destroy(pthread_barrier_t *b);
+int pthread_barrier_init(pthread_barrier_t *barrier, const void *attr, unsigned int count);
+int pthread_barrier_wait(pthread_barrier_t *barrier);
+int pthread_barrier_destroy(pthread_barrier_t *barrier);
 
 int pthread_condattr_init(pthread_condattr_t *attr);
 int pthread_condattr_getclock(const pthread_condattr_t *attr, clockid_t *clock_id);
