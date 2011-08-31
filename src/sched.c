@@ -123,8 +123,6 @@ int sched_getparam(pid_t pid, struct sched_param *param)
     return 0;
 }
 
-extern long libpthread_time_increment;
-
 /**
  * Get the SCHED_RR interval.
  * @param  pid The process identifier.
@@ -133,7 +131,12 @@ extern long libpthread_time_increment;
  */
 int sched_rr_get_interval(pid_t pid, struct timespec * tp)
 {
+    DWORD   timeAdjustment, timeIncrement;
+    BOOL    isTimeAdjustmentDisabled;
+
+    (void) GetSystemTimeAdjustment(&timeAdjustment, &timeIncrement, &isTimeAdjustmentDisabled);
     tp->tv_sec = 0;
-    tp->tv_nsec = libpthread_time_increment;
+    tp->tv_nsec = timeIncrement * 100;
+
     return 0;
 }

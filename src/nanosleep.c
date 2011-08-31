@@ -63,7 +63,7 @@ int nanosleep(const struct timespec *request, struct timespec *remain)
         rc = SleepEx(ms, TRUE);
     }
 
-    if (rc != 0) { /* WAIT_IO_COMPLETION */
+    if (rc != 0) { /* WAIT_IO_COMPLETION (192) */
         if (remain != NULL) {
             GetSystemTimeAsFileTime(&_end.ft);
             real = (_end.ns100 - _start.ns100) / POW10_4;

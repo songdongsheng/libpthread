@@ -222,19 +222,18 @@ static __inline void spin_unlock(volatile long *lock)
     *lock = 0;
 }
 
-extern DWORD libpthread_time_increment;
 static __inline void arch_mutex_init_handle(HANDLE *sync)
 {
     HANDLE handle;
 
-    while(*sync == NULL) {
+    while (*sync == NULL) {
         handle = CreateEvent(NULL, FALSE, FALSE, NULL);
         if (handle != NULL) {
             if (atomic_cmpxchg_ptr(sync, handle, NULL) != NULL)
                 (void) CloseHandle(handle);
             return;
         } else {
-            Sleep(libpthread_time_increment);
+            (void) SleepEx(1000, TRUE); /* Waiting for resources available */
         }
     }
 }

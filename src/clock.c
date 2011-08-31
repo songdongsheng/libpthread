@@ -29,9 +29,6 @@
 
 #include "misc.h"
 
-extern DWORD libpthread_time_increment;
-extern __int64 libpthread_hpet_frequency;
-
 /**
  * Get the resolution of the specified clock clock_id and
  * stores it in the struct timespec pointed to by res.
@@ -54,18 +51,24 @@ extern __int64 libpthread_hpet_frequency;
 int clock_getres(clockid_t clock_id, struct timespec *res)
 {
     if (clock_id == CLOCK_MONOTONIC) {
-        if (libpthread_hpet_frequency < 1000)
+        LARGE_INTEGER pf;
+
+        if (QueryPerformanceFrequency(&pf) == 0)
             return set_errno(EINVAL);
 
         res->tv_sec = 0;
-        res->tv_nsec = (int) ((POW10_9 + (libpthread_hpet_frequency >> 1)) / libpthread_hpet_frequency);
+        res->tv_nsec = (int) ((POW10_9 + (pf.QuadPart >> 1)) / pf.QuadPart);
         if (res->tv_nsec < 1)
             res->tv_nsec = 1;
 
         return 0;
     } else { /* CLOCK_REALTIME, CLOCK_PROCESS_CPUTIME_ID, CLOCK_THREAD_CPUTIME_ID */
-        res->tv_sec = libpthread_time_increment / POW10_7;
-        res->tv_nsec = ((int)(libpthread_time_increment % POW10_7)) * POW10_2;
+        DWORD   timeAdjustment, timeIncrement;
+        BOOL    isTimeAdjustmentDisabled;
+
+        (void) GetSystemTimeAdjustment(&timeAdjustment, &timeIncrement, &isTimeAdjustmentDisabled);
+        res->tv_sec = 0;
+        res->tv_nsec = timeIncrement * 100;
 
         return 0;
     }
@@ -104,13 +107,16 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
         return 0;
     } else if (clock_id == CLOCK_MONOTONIC) {
-        LARGE_INTEGER performanceCount;
+        LARGE_INTEGER pf, pc;
 
-        if (libpthread_hpet_frequency < 1000 || QueryPerformanceCounter(&performanceCount) == 0)
+        if (QueryPerformanceFrequency(&pf) == 0)
             return set_errno(EINVAL);
 
-        tp->tv_sec = performanceCount.QuadPart / libpthread_hpet_frequency;
-        tp->tv_nsec = (int) ((performanceCount.QuadPart % libpthread_hpet_frequency + (libpthread_hpet_frequency >> 1)) * POW10_9 / libpthread_hpet_frequency);
+        if (QueryPerformanceFrequency(&pc) == 0)
+            return set_errno(EINVAL);
+
+        tp->tv_sec = pc.QuadPart / pf.QuadPart;
+        tp->tv_nsec = (int) (((pc.QuadPart % pf.QuadPart) * POW10_9 + (pf.QuadPart >> 1)) / pf.QuadPart);
         if (tp->tv_nsec >= POW10_9) {
             tp->tv_sec ++;
             tp->tv_nsec -= POW10_9;

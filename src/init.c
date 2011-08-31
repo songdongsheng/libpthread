@@ -25,8 +25,6 @@
 #include <winsock2.h>
 
 DWORD libpthread_tls_index;
-long libpthread_time_increment; /* nanoseconds */
-__int64 libpthread_hpet_frequency;
 
 static BOOL libpthread_fini(void) {
     TlsFree(libpthread_tls_index);
@@ -34,24 +32,8 @@ static BOOL libpthread_fini(void) {
 }
 
 static BOOL libpthread_init(void) {
-    DWORD   timeAdjustment, timeIncrement;
-    BOOL    isTimeAdjustmentDisabled;
-
-    LARGE_INTEGER pf;
-
     if ((libpthread_tls_index = TlsAlloc()) == TLS_OUT_OF_INDEXES)
         return FALSE;
-
-    if (GetSystemTimeAdjustment(&timeAdjustment, &timeIncrement, &isTimeAdjustmentDisabled) == 0)
-        return FALSE;
-
-    libpthread_time_increment = timeIncrement * 100;
-
-    if (QueryPerformanceFrequency(&pf) != 0) {
-        libpthread_hpet_frequency = pf.QuadPart;
-    } else {
-        libpthread_hpet_frequency = 0;
-    }
 
     return TRUE;
 }
