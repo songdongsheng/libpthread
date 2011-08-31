@@ -2,6 +2,7 @@ ADD_LIBRARY (${LIBPTHREAD_NAME} SHARED libpthread.def version.rc
         clock.c
         key.c
         mutex.c
+        nanosleep.c
         pthread.c
         sched.c
         sem.c
