@@ -102,8 +102,7 @@ typedef struct {
 typedef struct {
     long wait;
     long lock_status; /* 0:unlocked, 1:locked */
-    long thread_id; /* debug only */
-    long cpu_count;
+    /* long thread_id; debug only */
     long spin_count;
     HANDLE sync;
 } arch_mutex;

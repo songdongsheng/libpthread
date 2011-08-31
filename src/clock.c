@@ -143,36 +143,64 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 }
 
 /**
- * Sleep up to 49.7 days.
- * @param  request The requested sleep interval.
- * @param  remain This argument should normally be specified as NULL.
- *         The current implemention just ignore it.
+ * Sleep for the specified time.
+ * @param  request The desired amount of time to sleep.
+ * @param  remain The remain amount of time to sleep.
  * @return If the function succeeds, the return value is 0.
  *         If the function fails, the return value is -1,
  *         with errno set to indicate the error.
  */
 int nanosleep(const struct timespec *request, struct timespec *remain)
 {
-    __int64 i64;
+    unsigned long ms, rc = 0;
+    unsigned __int64 u64, want, real;
 
-    if (request->tv_sec < 0 || request->tv_sec > 4294967 || request->tv_nsec < 0 || request->tv_nsec >= POW10_9)
-        return set_errno(EINVAL);
+    union {
+        unsigned __int64 ns100;
+        FILETIME ft;
+    }  _start, _end;
 
-    i64 = request->tv_sec * POW10_3 + request->tv_nsec / POW10_6;
-    if (i64 < 0 || i64 >= 0xFFFFFFFF)
-        return set_errno(EINVAL);
+    if (request->tv_sec < 0 || request->tv_nsec < 0 || request->tv_nsec >= POW10_9) {
+        errno = EINVAL;
+        return -1;
+    }
 
-    Sleep((unsigned) i64);
+    if (remain != NULL) GetSystemTimeAsFileTime(&_start.ft);
+
+    want = u64 = request->tv_sec * POW10_3 + request->tv_nsec / POW10_6;
+    while (u64 > 0) {
+        if (u64 >= MAX_SLEEP_IN_MS) ms = MAX_SLEEP_IN_MS;
+        else ms = (unsigned long) u64;
+
+        u64 -= ms;
+        rc = SleepEx(ms, TRUE);
+    }
+
+    if (rc != 0) { /* WAIT_IO_COMPLETION */
+        if (remain != NULL) {
+            GetSystemTimeAsFileTime(&_end.ft);
+            real = (_end.ns100 - _start.ns100) / POW10_4;
+
+            if (real >= want) u64 = 0;
+            else u64 = want - real;
+
+            remain->tv_sec = u64 / POW10_3;
+            remain->tv_nsec = (long) (u64 % POW10_3) * POW10_6;
+        }
+
+        errno = EINTR;
+        return -1;
+    }
 
     return 0;
 }
 
 /**
- * Sleep up to 49.7 days.
+ * Sleep for the specified time.
  * @param  clock_id This argument should always be CLOCK_REALTIME (0).
  * @param  flags 0 for relative sleep interval, others for absolute waking up.
- * @param  request The requested sleep interval or absolute waking up time.
- * @param  remain This argument should normally be specified as NULL.
+ * @param  request The desired sleep interval or absolute waking up time.
+ * @param  remain The remain amount of time to sleep.
  *         The current implemention just ignore it.
  * @return If the function succeeds, the return value is 0.
  *         If the function fails, the return value is -1,
@@ -182,16 +210,25 @@ int clock_nanosleep(clockid_t clock_id, int flags,
                            const struct timespec *request,
                            struct timespec *remain)
 {
+    struct timespec tp;
+
     if (clock_id != CLOCK_REALTIME)
         return set_errno(EINVAL);
 
     if (flags == 0)
-        return nanosleep(request, NULL);
+        return nanosleep(request, remain);
 
     /* TIMER_ABSTIME = 1 */
-    Sleep(arch_rel_time_in_ms(request));
+    clock_gettime(CLOCK_REALTIME, &tp);
 
-    return 0;
+    tp.tv_sec = request->tv_sec - tp.tv_sec;
+    tp.tv_nsec = request->tv_nsec - tp.tv_nsec;
+    if (tp.tv_nsec < 0) {
+        tp.tv_nsec += POW10_9;
+        tp.tv_sec --;
+    }
+
+    return nanosleep(&tp, remain);
 }
 
 /**

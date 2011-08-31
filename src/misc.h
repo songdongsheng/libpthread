@@ -45,6 +45,8 @@
  */
 #define DELTA_EPOCH_IN_100NS    INT64_C(116444736000000000)
 
+#define MAX_SLEEP_IN_MS         4294967294UL
+
 #define POW10_2     INT64_C(100)
 #define POW10_3     INT64_C(1000)
 #define POW10_4     INT64_C(10000)
@@ -205,6 +207,16 @@ static __inline void cpu_relax(void)
  * http://msdn.microsoft.com/en-us/library/7kcdt6fy.aspx [x64 Software Conventions, RAX, (RCX, RDX, R8, R9), R10, R11]
  * http://msdn.microsoft.com/zh-cn/library/26td21ds.aspx [Compiler Intrinsics]
  */
+static __inline void atomic_set(long volatile *__ptr, long value)
+{
+    *__ptr = value;
+}
+
+static __inline long atomic_read(long volatile *__ptr)
+{
+    return *__ptr;
+}
+
 static __inline long atomic_inc(long volatile *__ptr)
 {
 #ifdef _MSC_VER

@@ -227,12 +227,46 @@ void test_mutex()
     fprintf(stdout, " pthread_mutex_lock/pthread_mutex_unlock: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
 }
 
+#ifndef _MSC_VER
+__attribute__ ((noinline))
+#endif
+__int64 mono_getres(struct timespec *tp)  {
+    LARGE_INTEGER pf;
+
+    /* 0.307 us */
+    if (QueryPerformanceFrequency(&pf) != 0) {
+        return pf.QuadPart;
+    }
+
+    /* 0.336 us */
+    /*
+    if (GetSystemTimeAdjustment(&timeAdjustment, &timeIncrement, &isTimeAdjustmentDisabled) == 0)
+        return -1;
+*/
+    return 0;
+}
+
+void test_mono()
+{
+    int i;
+    struct timespec tp, tp2, ti;
+
+    clock_gettime(CLOCK_MONOTONIC, &tp);
+    for(i = 0; i < TEST_TIMES; i++) {
+        mono_getres(&ti);
+    }
+    clock_gettime(CLOCK_MONOTONIC, &tp2);
+
+    fprintf(stdout, "               QueryPerformanceFrequency: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
+}
+
 int main(int argc, char *argv[])
 {
     struct timespec tp;
 
     clock_gettime(CLOCK_MONOTONIC, &tp);
 
+    test_mono();
     test_mutex();
     test_spin_count();
     test_spin();

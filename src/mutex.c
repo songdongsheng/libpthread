@@ -184,14 +184,13 @@ int pthread_mutexattr_destroy(pthread_mutexattr_t *attr)
 
 static int arch_mutex_init(pthread_mutex_t *m, int lock)
 {
+    int cpu_count = get_ncpu();
     arch_mutex *pv = calloc(1, sizeof(arch_mutex));
     if (pv == NULL)
         return ENOMEM;
 
-    pv->cpu_count = get_ncpu();
-
     /* see test_speed, about 1/2 the system call*/
-    if (pv->cpu_count > 1) pv->spin_count = 32;
+    if (cpu_count > 1) pv->spin_count = 32;
 
     if (!lock) {
         *m = pv;
@@ -210,7 +209,7 @@ static __inline int spin_lock_with_count(volatile long *lock, int count)
     int i = 0;
 
     do {
-        if(atomic_cmpxchg((volatile long *) lock, 1, 0) == 0)
+        if (atomic_cmpxchg((volatile long *) lock, 1, 0) == 0)
             return 1;
         cpu_relax();
     } while(++i < count);
@@ -231,8 +230,8 @@ static __inline void arch_mutex_init_handle(HANDLE *sync)
     while(*sync == NULL) {
         handle = CreateEvent(NULL, FALSE, FALSE, NULL);
         if (handle != NULL) {
-            if(atomic_cmpxchg_ptr(sync, handle, NULL) != NULL)
-                CloseHandle(handle);
+            if (atomic_cmpxchg_ptr(sync, handle, NULL) != NULL)
+                (void) CloseHandle(handle);
             return;
         } else {
             Sleep(libpthread_time_increment);
@@ -276,16 +275,22 @@ int pthread_mutex_lock(pthread_mutex_t *m)
 
     while(1) {
         if (spin_lock_with_count(& pv->lock_status, pv->spin_count)) {
-            pv->thread_id = GetCurrentThreadId();
+            /* pv->thread_id = GetCurrentThreadId(); */
             return 0;
         }
 
         if (pv->sync == NULL)
             arch_mutex_init_handle(& pv->sync);
 
-        atomic_inc(& pv->wait);
-        WaitForSingleObject(pv->sync, INFINITE);
-        atomic_dec(& pv->wait);
+        (void) atomic_inc(& pv->wait);
+        /* Small probability event, but we must examine it. */
+        if (atomic_cmpxchg((volatile long *) & pv->lock_status, 1, 0) == 0) {
+            /* pv->thread_id = GetCurrentThreadId(); */
+            (void) atomic_dec(& pv->wait);
+            return 0;
+        }
+        (void) WaitForSingleObject(pv->sync, INFINITE);
+        (void) atomic_dec(& pv->wait);
     }
 
     return 0;
@@ -310,7 +315,7 @@ int pthread_mutex_trylock(pthread_mutex_t *m)
     pv = (arch_mutex *) *m;
 
     if (spin_lock_with_count(& pv->lock_status, pv->spin_count)) {
-        pv->thread_id = GetCurrentThreadId();
+        /* pv->thread_id = GetCurrentThreadId(); */
         return 0;
     }
 
@@ -328,9 +333,9 @@ int pthread_mutex_unlock(pthread_mutex_t *m)
 {
     arch_mutex *pv = (arch_mutex *) *m;
     if (pv != NULL) {
-        spin_unlock(& pv->lock_status);
-        pv->thread_id = 0;
-        if (*((long volatile *) & pv->wait) != 0)
+        /* pv->thread_id = 0; */
+        atomic_set(& pv->lock_status, 0);
+        if (atomic_read(& pv->wait))
             SetEvent(pv->sync);
         return 0;
     }

@@ -30,6 +30,9 @@ TARGET_LINK_LIBRARIES (test_spin ${LIBPTHREAD_NAME})
 ADD_EXECUTABLE (test_speed test_speed.c)
 TARGET_LINK_LIBRARIES (test_speed ${LIBPTHREAD_NAME})
 
+ADD_EXECUTABLE (test_nanosleep test_nanosleep.c)
+TARGET_LINK_LIBRARIES (test_nanosleep ${LIBPTHREAD_NAME})
+
 # http://www.cmake.org/Wiki/CMake_Testing_With_CTest
 ADD_TEST (test_max_key test_max_key)
 
@@ -43,3 +46,4 @@ ADD_TEST (test_mutex test_mutex)
 ADD_TEST (test_once test_once)
 ADD_TEST (test_spin test_spin)
 ADD_TEST (test_speed test_speed)
+ADD_TEST (test_nanosleep test_nanosleep)
