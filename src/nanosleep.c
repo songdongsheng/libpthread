@@ -55,7 +55,7 @@ int nanosleep(const struct timespec *request, struct timespec *remain)
     if (remain != NULL) GetSystemTimeAsFileTime(&_start.ft);
 
     want = u64 = request->tv_sec * POW10_3 + request->tv_nsec / POW10_6;
-    while (u64 > 0) {
+    while (u64 > 0 && rc == 0) {
         if (u64 >= MAX_SLEEP_IN_MS) ms = MAX_SLEEP_IN_MS;
         else ms = (unsigned long) u64;
 
