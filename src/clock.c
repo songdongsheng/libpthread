@@ -33,7 +33,7 @@
  * Get the resolution of the specified clock clock_id and
  * stores it in the struct timespec pointed to by res.
  * @param  clock_id The clock_id argument is the identifier of the particular
- *         clock on which to act. libpthread support the following clocks:
+ *         clock on which to act. The following clocks are supported:
  * <pre>
  *     CLOCK_REALTIME  System-wide real-time clock. Setting this clock
  *                 requires appropriate privileges.
@@ -50,27 +50,37 @@
  */
 int clock_getres(clockid_t clock_id, struct timespec *res)
 {
-    if (clock_id == CLOCK_MONOTONIC) {
-        LARGE_INTEGER pf;
+    switch(clock_id) {
+    case CLOCK_MONOTONIC:
+        {
+            LARGE_INTEGER pf;
 
-        if (QueryPerformanceFrequency(&pf) == 0)
-            return set_errno(EINVAL);
+            if (QueryPerformanceFrequency(&pf) == 0)
+                return set_errno(EINVAL);
 
-        res->tv_sec = 0;
-        res->tv_nsec = (int) ((POW10_9 + (pf.QuadPart >> 1)) / pf.QuadPart);
-        if (res->tv_nsec < 1)
-            res->tv_nsec = 1;
+            res->tv_sec = 0;
+            res->tv_nsec = (int) ((POW10_9 + (pf.QuadPart >> 1)) / pf.QuadPart);
+            if (res->tv_nsec < 1)
+                res->tv_nsec = 1;
 
-        return 0;
-    } else { /* CLOCK_REALTIME, CLOCK_PROCESS_CPUTIME_ID, CLOCK_THREAD_CPUTIME_ID */
-        DWORD   timeAdjustment, timeIncrement;
-        BOOL    isTimeAdjustmentDisabled;
+            return 0;
+        }
 
-        (void) GetSystemTimeAdjustment(&timeAdjustment, &timeIncrement, &isTimeAdjustmentDisabled);
-        res->tv_sec = 0;
-        res->tv_nsec = timeIncrement * 100;
+    case CLOCK_REALTIME:
+    case CLOCK_PROCESS_CPUTIME_ID:
+    case CLOCK_THREAD_CPUTIME_ID:
+        {
+            DWORD   timeAdjustment, timeIncrement;
+            BOOL    isTimeAdjustmentDisabled;
 
-        return 0;
+            (void) GetSystemTimeAdjustment(&timeAdjustment, &timeIncrement, &isTimeAdjustmentDisabled);
+            res->tv_sec = 0;
+            res->tv_nsec = timeIncrement * 100;
+
+            return 0;
+        }
+    default:
+        break;
     }
 
     return set_errno(EINVAL);
@@ -80,7 +90,7 @@ int clock_getres(clockid_t clock_id, struct timespec *res)
  * Get the time of the specified clock clock_id and stores it in the struct
  * timespec pointed to by tp.
  * @param  clock_id The clock_id argument is the identifier of the particular
- *         clock on which to act. libpthread support the following clocks:
+ *         clock on which to act. The following clocks are supported:
  * <pre>
  *     CLOCK_REALTIME  System-wide real-time clock. Setting this clock
  *                 requires appropriate privileges.
@@ -96,53 +106,66 @@ int clock_getres(clockid_t clock_id, struct timespec *res)
  */
 int clock_gettime(clockid_t clock_id, struct timespec *tp)
 {
-    __int64 t;
-
-    if (clock_id == CLOCK_REALTIME) {
+    unsigned __int64 t;
+    LARGE_INTEGER pf, pc;
+    union {
+        unsigned __int64 u64;
         FILETIME ft;
-        GetSystemTimeAsFileTime(&ft);
-        t = (((__int64) ft.dwHighDateTime) << 32 | ft.dwLowDateTime) - DELTA_EPOCH_IN_100NS;
-        tp->tv_sec = t / POW10_7;
-        tp->tv_nsec = ((int) (t % POW10_7)) * 100;
+    }  ct, et, kt, ut;
 
-        return 0;
-    } else if (clock_id == CLOCK_MONOTONIC) {
-        LARGE_INTEGER pf, pc;
+    switch(clock_id) {
+    case CLOCK_REALTIME:
+        {
+            GetSystemTimeAsFileTime(&ct.ft);
+            t = ct.u64 - DELTA_EPOCH_IN_100NS;
+            tp->tv_sec = t / POW10_7;
+            tp->tv_nsec = ((int) (t % POW10_7)) * 100;
 
-        if (QueryPerformanceFrequency(&pf) == 0)
-            return set_errno(EINVAL);
-
-        if (QueryPerformanceFrequency(&pc) == 0)
-            return set_errno(EINVAL);
-
-        tp->tv_sec = pc.QuadPart / pf.QuadPart;
-        tp->tv_nsec = (int) (((pc.QuadPart % pf.QuadPart) * POW10_9 + (pf.QuadPart >> 1)) / pf.QuadPart);
-        if (tp->tv_nsec >= POW10_9) {
-            tp->tv_sec ++;
-            tp->tv_nsec -= POW10_9;
+            return 0;
         }
 
-        return 0;
-    } else if (clock_id == CLOCK_PROCESS_CPUTIME_ID) {
-        FILETIME ct, et, kt, ut;
-        if(0 == GetProcessTimes(GetCurrentProcess(), &ct, &et, &kt, &ut))
+    case CLOCK_MONOTONIC:
+        {
+            if (QueryPerformanceFrequency(&pf) == 0)
+                return set_errno(EINVAL);
+
+            if (QueryPerformanceFrequency(&pc) == 0)
+                return set_errno(EINVAL);
+
+            tp->tv_sec = pc.QuadPart / pf.QuadPart;
+            tp->tv_nsec = (int) (((pc.QuadPart % pf.QuadPart) * POW10_9 + (pf.QuadPart >> 1)) / pf.QuadPart);
+            if (tp->tv_nsec >= POW10_9) {
+                tp->tv_sec ++;
+                tp->tv_nsec -= POW10_9;
+            }
+
+            return 0;
+        }
+
+    case CLOCK_PROCESS_CPUTIME_ID:
+        {
+        if(0 == GetProcessTimes(GetCurrentProcess(), &ct.ft, &et.ft, &kt.ft, &ut.ft))
             return set_errno(EINVAL);
-        t = (((__int64) kt.dwHighDateTime) << 32 | kt.dwLowDateTime) +
-            (((__int64) ut.dwHighDateTime) << 32 | ut.dwLowDateTime);
+        t = kt.u64 + ut.u64;
         tp->tv_sec = t / POW10_7;
         tp->tv_nsec = ((int) (t % POW10_7)) * 100;
 
         return 0;
-    } else if (clock_id == CLOCK_THREAD_CPUTIME_ID) {
-        FILETIME ct, et, kt, ut;
-        if(0 == GetThreadTimes(GetCurrentThread(), &ct, &et, &kt, &ut))
-            return set_errno(EINVAL);
-        t = (((__int64) kt.dwHighDateTime) << 32 | kt.dwLowDateTime) +
-            (((__int64) ut.dwHighDateTime) << 32 | ut.dwLowDateTime);
-        tp->tv_sec = t / POW10_7;
-        tp->tv_nsec = ((int) (t % POW10_7)) * 100;
+        }
 
-        return 0;
+    case CLOCK_THREAD_CPUTIME_ID: 
+        {
+            if(0 == GetThreadTimes(GetCurrentThread(), &ct.ft, &et.ft, &kt.ft, &ut.ft))
+                return set_errno(EINVAL);
+            t = kt.u64 + ut.u64;
+            tp->tv_sec = t / POW10_7;
+            tp->tv_nsec = ((int) (t % POW10_7)) * 100;
+
+            return 0;
+        }
+
+    default:
+        break;
     }
 
     return set_errno(EINVAL);
@@ -194,18 +217,18 @@ int clock_nanosleep(clockid_t clock_id, int flags,
  */
 int clock_settime(clockid_t clock_id, const struct timespec *tp)
 {
-    unsigned __int64 t64;
-    FILETIME ft;
     SYSTEMTIME st;
+
+    union {
+        unsigned __int64 u64;
+        FILETIME ft;
+    }  t;
 
     if (clock_id != CLOCK_REALTIME)
         return set_errno(EINVAL);
 
-    t64 = tp->tv_sec * POW10_7 + tp->tv_nsec / 100 + DELTA_EPOCH_IN_100NS;
-    ft.dwLowDateTime = (DWORD) t64;
-    ft.dwHighDateTime = (DWORD) (t64 >> 32);
-
-    if (FileTimeToSystemTime(&ft, &st) == 0)
+    t.u64 = tp->tv_sec * POW10_7 + tp->tv_nsec / 100 + DELTA_EPOCH_IN_100NS;
+    if (FileTimeToSystemTime(&t.ft, &st) == 0)
         return set_errno(EINVAL);
 
     if (SetSystemTime(&st) == 0)
