@@ -36,6 +36,15 @@ TARGET_LINK_LIBRARIES (test_nanosleep ${LIBPTHREAD_NAME})
 ADD_EXECUTABLE (test_clock_getres test_clock_getres.c)
 TARGET_LINK_LIBRARIES (test_clock_getres ${LIBPTHREAD_NAME})
 
+ADD_EXECUTABLE (test_clock_gettime test_clock_gettime.c)
+TARGET_LINK_LIBRARIES (test_clock_gettime ${LIBPTHREAD_NAME})
+
+ADD_EXECUTABLE (test_clock_nanosleep test_clock_nanosleep.c)
+TARGET_LINK_LIBRARIES (test_clock_nanosleep ${LIBPTHREAD_NAME})
+
+ADD_EXECUTABLE (test_clock_settime test_clock_settime.c)
+TARGET_LINK_LIBRARIES (test_clock_settime ${LIBPTHREAD_NAME})
+
 # http://www.cmake.org/Wiki/CMake_Testing_With_CTest
 ADD_TEST (test_max_key test_max_key)
 
@@ -51,3 +60,6 @@ ADD_TEST (test_spin test_spin)
 ADD_TEST (test_speed test_speed)
 ADD_TEST (test_nanosleep test_nanosleep)
 ADD_TEST (test_clock_getres test_clock_getres)
+ADD_TEST (test_clock_gettime test_clock_gettime)
+ADD_TEST (test_clock_nanosleep test_clock_nanosleep)
+ADD_TEST (test_clock_settime test_clock_settime)
