@@ -78,7 +78,7 @@ int pthread_attr_init(pthread_attr_t *attr)
 {
     arch_thread_attr *pv = calloc(1, sizeof(arch_thread_attr));
     if (pv == NULL)
-        return set_errno(ENOMEM);
+        return lc_set_errno(ENOMEM);
 
     pv->sched_policy = SCHED_OTHER;
     pv->sched_param.sched_priority = 8;
@@ -514,7 +514,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_
     unsigned stack_size = 0;
     arch_thread_info *pv = calloc(1, sizeof(arch_thread_info));
     if (pv == NULL)
-        return set_errno(ENOMEM);
+        return lc_set_errno(ENOMEM);
 
     if (attr != NULL) stack_size = ((arch_thread_attr * ) attr)->stack_size;
 
@@ -604,7 +604,7 @@ int pthread_getschedparam(pthread_t thread, int *policy, struct sched_param *par
 
         priority = GetThreadPriority(handle);
         if (priority == THREAD_PRIORITY_ERROR_RETURN)
-            return set_errno(ESRCH);
+            return lc_set_errno(ESRCH);
         param->sched_priority = os_priority_to_sched_priority(priority);
     }
 
@@ -645,7 +645,7 @@ int pthread_setschedprio(pthread_t thread, int priority)
     else handle = GetCurrentThread();
 
     if (SetThreadPriority(handle, sched_priority_to_os_priority(priority)) == 0)
-        return set_errno(ESRCH);
+        return lc_set_errno(ESRCH);
 
     return 0;
 }

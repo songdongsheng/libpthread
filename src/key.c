@@ -47,7 +47,7 @@
 int pthread_key_create(pthread_key_t *key, void (* destructor)(void *))
 {
     if ((*key = TlsAlloc()) == TLS_OUT_OF_INDEXES)
-        return set_errno(EAGAIN);
+        return lc_set_errno(EAGAIN);
 
     return 0;
 }
@@ -63,7 +63,7 @@ int pthread_key_create(pthread_key_t *key, void (* destructor)(void *))
 int pthread_setspecific(pthread_key_t key, const void *value)
 {
     if (TlsSetValue(key, (LPVOID) value) == 0)
-        return set_errno(EINVAL);
+        return lc_set_errno(EINVAL);
 
     return 0;
 }
@@ -80,7 +80,7 @@ void *pthread_getspecific(pthread_key_t key)
     void *rp = TlsGetValue(key);
 
     if ((rp == NULL) && (GetLastError() != ERROR_SUCCESS))
-        set_errno(EINVAL);
+        lc_set_errno(EINVAL);
 
     return rp;
 }
@@ -95,7 +95,7 @@ void *pthread_getspecific(pthread_key_t key)
 int pthread_key_delete(pthread_key_t key)
 {
     if (TlsFree(key) == 0)
-        return set_errno(EINVAL);
+        return lc_set_errno(EINVAL);
 
     return 0;
 }

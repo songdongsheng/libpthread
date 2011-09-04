@@ -69,7 +69,7 @@ int sched_setscheduler(pid_t pid, int policy, const struct sched_param *param)
     if (pid == 0 && policy == SCHED_OTHER && param != NULL) {
         int priority = sched_priority_to_os_priority(param->sched_priority);
         if(!SetThreadPriority(GetCurrentThread(), priority))
-            return set_errno(EPERM);
+            return lc_set_errno(EPERM);
     }
 
     return 0;

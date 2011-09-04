@@ -40,7 +40,7 @@
 int pthread_spin_init(pthread_spinlock_t *lock, int pshared)
 {
     if (PTHREAD_PROCESS_PRIVATE != pshared)
-        return set_errno(EINVAL);
+        return lc_set_errno(EINVAL);
 
     *lock = 0;
     return 0;
@@ -69,7 +69,7 @@ int pthread_spin_trylock(pthread_spinlock_t *lock)
 {
     long rv = atomic_cmpxchg((volatile long *) lock, 1, 0);
     if (rv == 0) return 0;
-    return set_errno(EBUSY);
+    return lc_set_errno(EBUSY);
 }
 
 /**

@@ -54,15 +54,15 @@
 #define POW10_7     INT64_C(10000000)
 #define POW10_9     INT64_C(1000000000)
 
-static __inline void _my_assert(char *message, char *file, unsigned int line)
+static __inline void lc_assert(char *message, char *file, unsigned int line)
 {
     fprintf(stderr, "Assertion failed: %s , file %s, line %u\n", message, file, line);
     exit(1);
 }
 
-#define assert(_Expression) (void)( (!!(_Expression)) || (_my_assert(#_Expression, __FILE__, __LINE__), 0) )
+#define assert(_Expression) (void)( (!!(_Expression)) || (lc_assert(#_Expression, __FILE__, __LINE__), 0) )
 
-static __inline int set_errno(int result)
+static __inline int lc_set_errno(int result)
 {
     if (result != 0) {
         errno = result;
@@ -271,7 +271,7 @@ static __inline void *atomic_cmpxchg_ptr(void * volatile *__ptr, void *__new, vo
 #endif
 }
 
-static int __inline get_ncpu()
+static __inline int get_ncpu()
 {
     int n = 0;
     DWORD_PTR pm, sm;

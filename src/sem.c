@@ -49,10 +49,10 @@ int sem_init(sem_t *sem, int pshared, unsigned int value)
     arch_sem_t *pv;
 
     if (sem == NULL || value > (unsigned int) SEM_VALUE_MAX)
-        return set_errno(EINVAL);
+        return lc_set_errno(EINVAL);
 
     if (NULL == (pv = (arch_sem_t *)calloc(1, sizeof(arch_sem_t))))
-        return set_errno(ENOMEM);
+        return lc_set_errno(ENOMEM);
 
     if (pshared != PTHREAD_PROCESS_PRIVATE) {
         sprintf(buf, "Global\\%p", pv);
@@ -60,7 +60,7 @@ int sem_init(sem_t *sem, int pshared, unsigned int value)
 
     if ((pv->handle = CreateSemaphore (NULL, value, SEM_VALUE_MAX, buf)) == NULL) {
         free(pv);
-        return set_errno(ENOSPC);
+        return lc_set_errno(ENOSPC);
     }
 
     *sem = pv;
@@ -79,10 +79,10 @@ int sem_wait(sem_t *sem)
     arch_sem_t *pv = (arch_sem_t *) sem;
 
     if (sem == NULL || pv == NULL)
-        return set_errno(EINVAL);
+        return lc_set_errno(EINVAL);
 
     if (WaitForSingleObject(pv->handle, INFINITE) != WAIT_OBJECT_0)
-        return set_errno(EINVAL);
+        return lc_set_errno(EINVAL);
 
     return 0;
 }
@@ -100,15 +100,15 @@ int sem_trywait(sem_t *sem)
     arch_sem_t *pv = (arch_sem_t *) sem;
 
     if (sem == NULL || pv == NULL)
-        return set_errno(EINVAL);
+        return lc_set_errno(EINVAL);
 
     if ((rc = WaitForSingleObject(pv->handle, 0)) == WAIT_OBJECT_0)
         return 0;
 
     if (rc == WAIT_TIMEOUT)
-        return set_errno(EAGAIN);
+        return lc_set_errno(EAGAIN);
 
-    return set_errno(EINVAL);
+    return lc_set_errno(EINVAL);
 }
 
 /**
@@ -127,15 +127,15 @@ int sem_timedwait(sem_t *sem, const struct timespec *abs_timeout)
     arch_sem_t *pv = (arch_sem_t *) sem;
 
     if (sem == NULL || pv == NULL)
-        return set_errno(EINVAL);
+        return lc_set_errno(EINVAL);
 
     if ((rc = WaitForSingleObject(pv->handle, arch_rel_time_in_ms(abs_timeout))) == WAIT_OBJECT_0)
         return 0;
 
     if (rc == WAIT_TIMEOUT)
-        return set_errno(ETIMEDOUT);
+        return lc_set_errno(ETIMEDOUT);
 
-    return set_errno(EINVAL);
+    return lc_set_errno(EINVAL);
 }
 
 /**
@@ -150,12 +150,12 @@ int sem_post(sem_t *sem)
     arch_sem_t *pv = (arch_sem_t *) sem;
 
     if (sem == NULL || pv == NULL)
-        return set_errno(EINVAL);
+        return lc_set_errno(EINVAL);
 
     if (ReleaseSemaphore(pv->handle, 1, NULL) == 0) {
         if (ERROR_TOO_MANY_POSTS == GetLastError())
-            return set_errno(EOVERFLOW);
-        return set_errno(EINVAL);
+            return lc_set_errno(EOVERFLOW);
+        return lc_set_errno(EINVAL);
     }
 
     return 0;
@@ -177,14 +177,14 @@ int sem_getvalue(sem_t *sem, int *value)
     switch (WaitForSingleObject(pv->handle, 0)) {
     case WAIT_OBJECT_0:
         if (!ReleaseSemaphore(pv->handle, 1, &previous))
-            return set_errno(EINVAL);
+            return lc_set_errno(EINVAL);
         *value = previous + 1;
         return 0;
     case WAIT_TIMEOUT:
         *value = 0;
         return 0;
     default:
-        return set_errno(EINVAL);
+        return lc_set_errno(EINVAL);
     }
 }
 
@@ -200,10 +200,10 @@ int sem_destroy(sem_t *sem)
     arch_sem_t *pv = (arch_sem_t *) sem;
 
     if (pv == NULL)
-        return set_errno(EINVAL);
+        return lc_set_errno(EINVAL);
 
     if (CloseHandle (pv->handle) == 0)
-        return set_errno(EINVAL);
+        return lc_set_errno(EINVAL);
 
     free(pv);
     *sem = NULL;
@@ -232,12 +232,12 @@ sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)
     arch_sem_t *pv;
 
     if (value > (unsigned int) SEM_VALUE_MAX || (len = strlen(name)) > (int) sizeof(buffer) - 8 || len < 1) {
-        set_errno(EINVAL);
+        lc_set_errno(EINVAL);
         return NULL;
     }
 
     if (NULL == (pv = (arch_sem_t *)calloc(1, sizeof(arch_sem_t)))) {
-        set_errno(ENOMEM);
+        lc_set_errno(ENOMEM);
         return NULL;
     }
 
@@ -249,13 +249,13 @@ sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)
     {
         switch(GetLastError()) {
             case ERROR_ACCESS_DENIED:
-                set_errno(EACCES);
+                lc_set_errno(EACCES);
                 break;
             case ERROR_INVALID_HANDLE:
-                set_errno(ENOENT);
+                lc_set_errno(ENOENT);
                 break;
             default:
-                set_errno(ENOSPC);
+                lc_set_errno(ENOSPC);
                 break;
         }
         free(pv);
@@ -265,14 +265,14 @@ sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)
             if ((oflag & O_CREAT) && (oflag & O_EXCL)) {
                 CloseHandle(pv->handle);
                 free(pv);
-                set_errno(EEXIST);
+                lc_set_errno(EEXIST);
                 return NULL;
             }
             return (sem_t *) pv;
         } else {
             if (!(oflag & O_CREAT)) {
                 free(pv);
-                set_errno(ENOENT);
+                lc_set_errno(ENOENT);
                 return NULL;
             }
         }
