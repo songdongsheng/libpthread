@@ -281,15 +281,15 @@ int pthread_mutex_lock(pthread_mutex_t *m)
         if (pv->sync == NULL)
             arch_mutex_init_handle(& pv->sync);
 
-        (void) atomic_inc(& pv->wait);
+        (void) atomic_fetch_and_add(& pv->wait, 1);
         /* Small probability event, but we must examine it. */
         if (atomic_cmpxchg((volatile long *) & pv->lock_status, 1, 0) == 0) {
             /* pv->thread_id = GetCurrentThreadId(); */
-            (void) atomic_dec(& pv->wait);
+            (void) atomic_fetch_and_add(& pv->wait, -1);
             return 0;
         }
         (void) WaitForSingleObject(pv->sync, INFINITE);
-        (void) atomic_dec(& pv->wait);
+        (void) atomic_fetch_and_add(& pv->wait, -1);
     }
 
     return 0;

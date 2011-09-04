@@ -35,8 +35,7 @@ int main(int argc, char *argv[])
     assert(pthread_spin_lock(&lock) == 0);
     printf("pthread_spin_lock passed\n");
 
-    assert(pthread_spin_trylock(&lock) == -1);
-    assert(errno == EBUSY);
+    assert(pthread_spin_trylock(&lock) == EBUSY);
     printf("pthread_spin_trylock passed\n");
 
     assert(pthread_spin_unlock(&lock) == 0);

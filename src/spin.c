@@ -35,12 +35,12 @@
  * @param  lock The spin lock object.
  * @param  pshared Must be PTHREAD_PROCESS_PRIVATE (0).
  * @return If the pshared is PTHREAD_PROCESS_PRIVATE, the return value is 0.
- *         Otherwise, the return value is -1, with errno set to EINVAL.
+ *         Otherwise, EINVAL returned to indicate the error.
  */
 int pthread_spin_init(pthread_spinlock_t *lock, int pshared)
 {
     if (PTHREAD_PROCESS_PRIVATE != pshared)
-        return lc_set_errno(EINVAL);
+        return EINVAL;
 
     *lock = 0;
     return 0;
@@ -53,7 +53,10 @@ int pthread_spin_init(pthread_spinlock_t *lock, int pshared)
  */
 int pthread_spin_lock(pthread_spinlock_t *lock)
 {
-    while(atomic_cmpxchg((volatile long *) lock, 1, 0) != 0)
+    /* owner: 0~15, next: 16~31 */
+    unsigned short ticket = (unsigned short) (atomic_fetch_and_add(lock, 0x10000) >> 16);
+
+    while ((unsigned short) atomic_read(lock) != ticket)
         cpu_relax();
 
     return 0;
@@ -63,13 +66,18 @@ int pthread_spin_lock(pthread_spinlock_t *lock)
  * Try acquire a spin lock.
  * @param  lock The spin lock object.
  * @return If it can acquire lock immediately, the return value is 0.
- *         Otherwise, the return value is -1, with errno set to EBUSY.
+ *         Otherwise, EBUSY returned to indicate the error.
  */
 int pthread_spin_trylock(pthread_spinlock_t *lock)
 {
-    long rv = atomic_cmpxchg((volatile long *) lock, 1, 0);
-    if (rv == 0) return 0;
-    return lc_set_errno(EBUSY);
+    /* owner: 0~15, next: 16~31 */
+    long tmp = atomic_read(lock);
+    if ((unsigned short) tmp == (unsigned short) (tmp >> 16)) {
+        if (atomic_cmpxchg(lock, tmp + 0x10000, tmp) == tmp)
+            return 0;
+    }
+
+    return EBUSY;
 }
 
 /**
@@ -79,7 +87,16 @@ int pthread_spin_trylock(pthread_spinlock_t *lock)
  */
 int pthread_spin_unlock(pthread_spinlock_t *lock)
 {
-    *lock = 0;
+    /* owner: 0~15, next: 16~31 */
+#ifdef _MSC_VER
+    unsigned short owner = (unsigned short) (*lock + 1);
+    *lock = (*lock & 0xFFFF0000) | owner;
+#else
+    asm volatile("incw %0"
+                 : "+m" (lock)
+                 :
+                 : "memory", "cc");
+#endif
     return 0;
 }
 

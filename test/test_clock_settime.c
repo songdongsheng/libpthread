@@ -28,21 +28,21 @@
 void test_clock_settime()
 {
     int rc;
-    struct timespec tp, request = { 1, 0 }, remain;
+    struct timespec tp;
 
     rc = clock_gettime(CLOCK_REALTIME, &tp);
     assert(rc == 0);
     printf("[%10"PRId64".%09d] clock_gettime (CLOCK_REALTIME)\n", (__int64) tp.tv_sec, (int) tp.tv_nsec);
-    
+
     rc = clock_settime(CLOCK_MONOTONIC, &tp);
     assert(rc == -1 && (errno == EINVAL));
-    
+
     rc = clock_settime(CLOCK_PROCESS_CPUTIME_ID, &tp);
     assert(rc == -1 && (errno == EINVAL));
-    
+
     rc = clock_settime(CLOCK_THREAD_CPUTIME_ID, &tp);
     assert(rc == -1 && (errno == EINVAL));
-    
+
     rc = clock_settime(CLOCK_REALTIME, &tp);
     assert(rc == 0 || (errno == EPERM));
 

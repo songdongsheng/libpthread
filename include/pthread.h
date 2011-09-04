@@ -73,11 +73,23 @@ extern "C" {
 #define _POSIX_THREAD_ATTR_STACKSIZE            200809L
 #endif
 
-/* We provide priority scheduling for threads.  */
-#ifndef _POSIX_THREAD_PRIORITY_SCHEDULING
-#define _POSIX_THREAD_PRIORITY_SCHEDULING       200809L
-#endif
+/* The following options are not supported */
+#undef _POSIX_THREAD_ATTR_STACKADDR
+#define _POSIX_THREAD_ATTR_STACKADDR -1
 
+#undef _POSIX_THREAD_PRIO_INHERIT
+#define _POSIX_THREAD_PRIO_INHERIT -1
+
+#undef _POSIX_THREAD_PRIO_PROTECT
+#define _POSIX_THREAD_PRIO_PROTECT -1
+
+#undef _POSIX_THREAD_PRIORITY_SCHEDULING
+#define _POSIX_THREAD_PRIORITY_SCHEDULING -1
+
+#undef _POSIX_THREAD_PROCESS_SHARED
+#define _POSIX_THREAD_PROCESS_SHARED -1
+
+/* POSIX Thread Definitions */
 #define PTHREAD_KEYS_MAX            1024
 
 #define PTHREAD_PROCESS_PRIVATE     0
@@ -122,9 +134,9 @@ extern "C" {
 typedef uintptr_t pthread_t;
 typedef void *pthread_attr_t;
 
-typedef unsigned long pthread_once_t;
-typedef unsigned long pthread_key_t;
-typedef unsigned long pthread_spinlock_t;
+typedef long pthread_once_t;
+typedef long pthread_key_t;
+typedef long pthread_spinlock_t;
 
 typedef void    *pthread_mutexattr_t;
 typedef void    *pthread_condattr_t;
@@ -135,6 +147,7 @@ typedef void    *pthread_mutex_t;
 typedef void    *pthread_cond_t;
 typedef void    *pthread_rwlock_t;
 typedef void    *pthread_barrier_t;
+typedef void    *pthread_spin_rwlock_t;
 
 /*
     #include <signal.h>
@@ -195,6 +208,15 @@ int pthread_spin_lock(pthread_spinlock_t *lock);
 int pthread_spin_trylock(pthread_spinlock_t *lock);
 int pthread_spin_unlock(pthread_spinlock_t *lock);
 int pthread_spin_destroy(pthread_spinlock_t *lock);
+
+int pthread_spin_rwlock_init(pthread_spin_rwlock_t *lock);
+int pthread_spin_rwlock_reader_lock(pthread_spin_rwlock_t *lock);
+int pthread_spin_rwlock_reader_try_lock(pthread_spin_rwlock_t *lock);
+int pthread_spin_rwlock_reader_unlock(pthread_spin_rwlock_t *lock);
+int pthread_spin_rwlock_writer_lock(pthread_spin_rwlock_t *lock);
+int pthread_spin_rwlock_writer_try_lock(pthread_spin_rwlock_t *lock);
+int pthread_spin_rwlock_writer_unlock(pthread_spin_rwlock_t *lock);
+int pthread_spin_rwlock_destroy(pthread_spin_rwlock_t *lock);
 
 int pthread_mutexattr_init(pthread_mutexattr_t *attr);
 int pthread_mutexattr_getprioceiling(const pthread_mutexattr_t *attr, int *prioceiling);

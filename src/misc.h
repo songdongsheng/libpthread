@@ -62,6 +62,9 @@ static __inline void lc_assert(char *message, char *file, unsigned int line)
 
 #define assert(_Expression) (void)( (!!(_Expression)) || (lc_assert(#_Expression, __FILE__, __LINE__), 0) )
 
+#ifndef _MSC_VER
+__attribute__((always_inline))
+#endif
 static __inline int lc_set_errno(int result)
 {
     if (result != 0) {
@@ -71,6 +74,9 @@ static __inline int lc_set_errno(int result)
     return 0;
 }
 
+#ifndef _MSC_VER
+__attribute__((always_inline))
+#endif
 static __inline __int64 FileTimeToUnixTimeIn100NS(FILETIME *input)
 {
     return (((__int64) input->dwHighDateTime) << 32 | input->dwLowDateTime) - DELTA_EPOCH_IN_100NS;
@@ -97,6 +103,9 @@ static __inline void arch_time_in_timespec(struct timespec *ts)
     ts->tv_nsec= ((int) (t % POW10_7)) * POW10_2;
 }
 
+#ifndef _MSC_VER
+__attribute__((always_inline))
+#endif
 static __inline __int64 arch_time_in_ms_from_timespec(const struct timespec *ts)
 {
     return ts->tv_sec * POW10_3 + ts->tv_nsec / POW10_6;
@@ -176,6 +185,17 @@ static __inline int os_priority_to_sched_priority(int os_priority)
     return priority;
 }
 
+/*
+ * http://gcc.gnu.org/onlinedocs/gcc/Machine-Constraints.html
+ * http://gcc.gnu.org/onlinedocs/gcc/Atomic-Builtins.html
+ * http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html
+ * http://msdn.microsoft.com/en-us/library/7kcdt6fy.aspx [x64 Software Conventions, RAX, (RCX, RDX, R8, R9), R10, R11]
+ * http://msdn.microsoft.com/zh-cn/library/26td21ds.aspx [Compiler Intrinsics]
+ */
+
+#ifndef _MSC_VER
+__attribute__((always_inline))
+#endif
 static __inline void memory_barrier(void)
 {
 #ifdef _MSC_VER
@@ -188,6 +208,9 @@ static __inline void memory_barrier(void)
 #endif
 }
 
+#ifndef _MSC_VER
+__attribute__((always_inline))
+#endif
 static __inline void cpu_relax(void)
 {
 #ifdef _MSC_VER
@@ -200,41 +223,49 @@ static __inline void cpu_relax(void)
 #endif
 }
 
-/*
- * http://gcc.gnu.org/onlinedocs/gcc/Machine-Constraints.html
- * http://gcc.gnu.org/onlinedocs/gcc/Atomic-Builtins.html
- * http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html
- * http://msdn.microsoft.com/en-us/library/7kcdt6fy.aspx [x64 Software Conventions, RAX, (RCX, RDX, R8, R9), R10, R11]
- * http://msdn.microsoft.com/zh-cn/library/26td21ds.aspx [Compiler Intrinsics]
- */
+#ifndef _MSC_VER
+__attribute__((always_inline))
+#endif
 static __inline void atomic_set(long volatile *__ptr, long value)
 {
     *__ptr = value;
 }
 
+#ifndef _MSC_VER
+__attribute__((always_inline))
+#endif
 static __inline long atomic_read(long volatile *__ptr)
 {
     return *__ptr;
 }
 
-static __inline long atomic_inc(long volatile *__ptr)
+#ifndef _MSC_VER
+__attribute__((always_inline))
+#endif
+static __inline long atomic_fetch_and_add(long volatile *__ptr, long value)
 {
 #ifdef _MSC_VER
-    return _InterlockedIncrement(__ptr);
+    return _InterlockedExchangeAdd(__ptr, value);
 #else
-    return __sync_add_and_fetch(__ptr, 1);
+    return __sync_fetch_and_add(__ptr, value);
 #endif
 }
 
-static __inline long atomic_dec(long volatile *__ptr)
+#ifndef _MSC_VER
+__attribute__((always_inline))
+#endif
+static __inline long atomic_add_and_fetch(long volatile *__ptr, long value)
 {
 #ifdef _MSC_VER
-    return _InterlockedDecrement(__ptr);
+    return _InterlockedExchangeAdd(__ptr, value) + value;
 #else
-    return __sync_add_and_fetch(__ptr, -1);
+    return __sync_add_and_fetch(__ptr, value);
 #endif
 }
 
+#ifndef _MSC_VER
+__attribute__((always_inline))
+#endif
 static __inline long atomic_cmpxchg(long volatile *__ptr, long __new, long __old)
 {
 #ifdef _MSC_VER
@@ -249,6 +280,9 @@ static __inline long atomic_cmpxchg(long volatile *__ptr, long __new, long __old
 #endif
 }
 
+#ifndef _MSC_VER
+__attribute__((always_inline))
+#endif
 static __inline void *atomic_cmpxchg_ptr(void * volatile *__ptr, void *__new, void *__old)
 {
 #ifdef _MSC_VER

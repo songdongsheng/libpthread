@@ -135,6 +135,12 @@ typedef struct {
     char rwlock[8]; /* InitializeSRWLock */
 } arch_rwlock;
 
+typedef struct {
+    long requests;
+    long completions;
+    long readers;
+} arch_spin_rwlock;
+
 /** @} */
 
 #endif
