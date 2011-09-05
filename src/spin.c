@@ -53,10 +53,10 @@ int pthread_spin_init(pthread_spinlock_t *lock, int pshared)
  */
 int pthread_spin_lock(pthread_spinlock_t *lock)
 {
-    /* owner: 0~15, next: 16~31 */
-    unsigned short ticket = (unsigned short) (atomic_fetch_and_add(lock, 0x10000) >> 16);
+    /* owner: 0~15, ticket: 16~31 */
+    long ticket = 0xFFFF & (atomic_fetch_and_add(lock, 0x10000) >> 16);
 
-    while ((unsigned short) atomic_read(lock) != ticket)
+    while ((0xFFFF & atomic_read(lock)) != ticket)
         cpu_relax();
 
     return 0;
@@ -70,9 +70,9 @@ int pthread_spin_lock(pthread_spinlock_t *lock)
  */
 int pthread_spin_trylock(pthread_spinlock_t *lock)
 {
-    /* owner: 0~15, next: 16~31 */
+    /* owner: 0~15, ticket: 16~31 */
     long tmp = atomic_read(lock);
-    if ((unsigned short) tmp == (unsigned short) (tmp >> 16)) {
+    if ((tmp & 0xFFFF) == (0xFFFF & (tmp >> 16))) {
         if (atomic_cmpxchg(lock, tmp + 0x10000, tmp) == tmp)
             return 0;
     }
@@ -87,16 +87,9 @@ int pthread_spin_trylock(pthread_spinlock_t *lock)
  */
 int pthread_spin_unlock(pthread_spinlock_t *lock)
 {
-    /* owner: 0~15, next: 16~31 */
-#ifdef _MSC_VER
-    unsigned short owner = (unsigned short) (*lock + 1);
+    /* owner: 0~15, ticket: 16~31 */
+    long owner = 0xFFFF & (*lock + 1);
     *lock = (*lock & 0xFFFF0000) | owner;
-#else
-    asm volatile("incw %0"
-                 : "+m" (lock)
-                 :
-                 : "memory", "cc");
-#endif
     return 0;
 }
 

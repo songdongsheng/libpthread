@@ -18,7 +18,7 @@
  */
 
 /**
- * @file spin.c
+ * @file spin_rwlock.c
  * @brief Implementation Code of Spin RWLock Routines
  */
 
@@ -60,25 +60,14 @@ int pthread_spin_rwlock_reader_lock(pthread_spin_rwlock_t *lock)
     if (pv == NULL)
         return EINVAL;
 
-    id = atomic_add_and_fetch(& pv->requests, 1);
-    while (atomic_read(& pv->completions) != id)
+    id = atomic_fetch_and_add(& pv->ticket, 1);
+    while (atomic_read(& pv->owner) != id)
         cpu_relax();
 
     atomic_fetch_and_add(& pv->readers, 1);
-    atomic_fetch_and_add(& pv->completions, 1);
+    pv->owner++;
 
     return 0;
-}
-
-/**
- * Try acquire a spin rdlock.
- * @param  lock The spin rwlock object.
- * @return If it can acquire lock immediately, the return value is 0.
- *         Otherwise, EBUSY returned to indicate the error.
- */
-int pthread_spin_rwlock_reader_try_lock(pthread_spin_rwlock_t *lock)
-{
-    return EBUSY;
 }
 
 /**
@@ -109,25 +98,14 @@ int pthread_spin_rwlock_writer_lock(pthread_spin_rwlock_t *lock)
     if (pv == NULL)
         return EINVAL;
 
-    id = atomic_add_and_fetch(& pv->requests, 1);
-    while (atomic_read(& pv->completions) != id)
+    id = atomic_fetch_and_add(& pv->ticket, 1);
+    while (atomic_read(& pv->owner) != id)
         cpu_relax();
 
     while (atomic_read(& pv->readers) > 0)
         cpu_relax();
 
     return 0;
-}
-
-/**
- * Try acquire a spin wrlock.
- * @param  lock The spin rwlock object.
- * @return If it can acquire lock immediately, the return value is 0.
- *         Otherwise, EBUSY returned to indicate the error.
- */
-int pthread_spin_rwlock_writer_try_lock(pthread_spin_rwlock_t *lock)
-{
-    return EBUSY;
 }
 
 /**
@@ -141,7 +119,7 @@ int pthread_spin_rwlock_writer_unlock(pthread_spin_rwlock_t *lock)
     if (pv == NULL)
         return EINVAL;
 
-    atomic_fetch_and_add(& pv->completions, 1);
+    pv->owner++;
 
     return 0;
 }

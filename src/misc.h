@@ -254,18 +254,6 @@ static __inline long atomic_fetch_and_add(long volatile *__ptr, long value)
 #ifndef _MSC_VER
 __attribute__((always_inline))
 #endif
-static __inline long atomic_add_and_fetch(long volatile *__ptr, long value)
-{
-#ifdef _MSC_VER
-    return _InterlockedExchangeAdd(__ptr, value) + value;
-#else
-    return __sync_add_and_fetch(__ptr, value);
-#endif
-}
-
-#ifndef _MSC_VER
-__attribute__((always_inline))
-#endif
 static __inline long atomic_cmpxchg(long volatile *__ptr, long __new, long __old)
 {
 #ifdef _MSC_VER

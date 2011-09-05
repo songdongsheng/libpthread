@@ -184,18 +184,18 @@ void __attribute__ ((noinline)) spin_count(int count)
 
 void test_spin_count()
 {
-    int i;
+    int i, count = 32;
     struct timespec tp, tp2;
 
-    spin_count(32);
+    spin_count(count);
 
     clock_gettime(CLOCK_MONOTONIC, &tp);
     for(i = 0; i < TEST_TIMES; i++) {
-        spin_count(32);
+        spin_count(count);
     }
     clock_gettime(CLOCK_MONOTONIC, &tp2);
 
-    fprintf(stdout, "   pthread_spin_lock/pthread_spin_unlock: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
+    fprintf(stdout, "                          spin_count(%02d): %7.3lf us\n", count, (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
 }
 
 void test_mutex()

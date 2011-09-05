@@ -211,10 +211,8 @@ int pthread_spin_destroy(pthread_spinlock_t *lock);
 
 int pthread_spin_rwlock_init(pthread_spin_rwlock_t *lock);
 int pthread_spin_rwlock_reader_lock(pthread_spin_rwlock_t *lock);
-int pthread_spin_rwlock_reader_try_lock(pthread_spin_rwlock_t *lock);
 int pthread_spin_rwlock_reader_unlock(pthread_spin_rwlock_t *lock);
 int pthread_spin_rwlock_writer_lock(pthread_spin_rwlock_t *lock);
-int pthread_spin_rwlock_writer_try_lock(pthread_spin_rwlock_t *lock);
 int pthread_spin_rwlock_writer_unlock(pthread_spin_rwlock_t *lock);
 int pthread_spin_rwlock_destroy(pthread_spin_rwlock_t *lock);
 

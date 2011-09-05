@@ -136,8 +136,8 @@ typedef struct {
 } arch_rwlock;
 
 typedef struct {
-    long requests;
-    long completions;
+    long ticket;
+    long owner;
     long readers;
 } arch_spin_rwlock;
 
