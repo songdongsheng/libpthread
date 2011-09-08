@@ -41,7 +41,7 @@ void test_cs()
     LeaveCriticalSection(&cs);
 
     clock_gettime(CLOCK_MONOTONIC, &tp);
-    for(i = 0; i < TEST_TIMES; i++) {
+    for(i = TEST_TIMES * 100; i > 0; i--) {
         EnterCriticalSection(&cs);
         LeaveCriticalSection(&cs);
     }
@@ -49,7 +49,8 @@ void test_cs()
 
     DeleteCriticalSection(&cs);
 
-    fprintf(stdout, "EnterCriticalSectio/LeaveCriticalSection: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
+    fprintf(stdout, "EnterCriticalSectio/LeaveCriticalSection: %7.3lf us\n",
+        (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 100000.0));
 }
 
 void test_tid()
@@ -60,12 +61,13 @@ void test_tid()
     GetCurrentThreadId();
 
     clock_gettime(CLOCK_MONOTONIC, &tp);
-    for(i = 0; i < TEST_TIMES; i++) {
+    for(i = TEST_TIMES * 1000; i > 0; i--) {
         GetCurrentThreadId();
     }
     clock_gettime(CLOCK_MONOTONIC, &tp2);
 
-    fprintf(stdout, "                      GetCurrentThreadId: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
+    fprintf(stdout, "                      GetCurrentThreadId: %7.3lf us\n",
+        (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000000.0));
 }
 
 void test_evt()
@@ -97,7 +99,8 @@ void test_evt()
 
     CloseHandle(event);
 
-    fprintf(stdout, "            SetEvent/WaitForSingleObject: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
+    fprintf(stdout, "            SetEvent/WaitForSingleObject: %7.3lf us\n",
+        (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
 }
 
 void test_sem()
@@ -129,7 +132,8 @@ void test_sem()
 
     CloseHandle(handle);
 
-    fprintf(stdout, "    ReleaseSemaphore/WaitForSingleObject: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
+    fprintf(stdout, "    ReleaseSemaphore/WaitForSingleObject: %7.3lf us\n",
+        (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
 }
 
 void test_lps()
@@ -146,7 +150,8 @@ void test_lps()
 
     CloseHandle(handle);
 
-    fprintf(stdout, "                                get_ncpu: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
+    fprintf(stdout, "                                get_ncpu: %7.3lf us\n",
+        (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
 }
 
 void test_spin()
@@ -159,13 +164,14 @@ void test_spin()
     pthread_spin_unlock(&lock);
 
     clock_gettime(CLOCK_MONOTONIC, &tp);
-    for(i = 0; i < TEST_TIMES; i++) {
+    for(i = TEST_TIMES * 100; i > 0; i--) {
         pthread_spin_lock(&lock);
         pthread_spin_unlock(&lock);
     }
     clock_gettime(CLOCK_MONOTONIC, &tp2);
 
-    fprintf(stdout, "   pthread_spin_lock/pthread_spin_unlock: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
+    fprintf(stdout, "   pthread_spin_lock/pthread_spin_unlock: %7.3lf us\n",
+        (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 100000.0));
 }
 
 #ifdef _MSC_VER
@@ -195,7 +201,8 @@ void test_spin_count()
     }
     clock_gettime(CLOCK_MONOTONIC, &tp2);
 
-    fprintf(stdout, "                          spin_count(%02d): %7.3lf us\n", count, (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
+    fprintf(stdout, "                          spin_count(%02d): %7.3lf us\n", count,
+        (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
 }
 
 void test_mutex()
@@ -218,13 +225,14 @@ void test_mutex()
     }
 
     clock_gettime(CLOCK_MONOTONIC, &tp);
-    for(i = 0; i < TEST_TIMES; i++) {
+    for(i = TEST_TIMES * 100; i > 0; i--) {
         pthread_mutex_lock(&mutex);
         pthread_mutex_unlock(&mutex);
     }
     clock_gettime(CLOCK_MONOTONIC, &tp2);
 
-    fprintf(stdout, " pthread_mutex_lock/pthread_mutex_unlock: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
+    fprintf(stdout, " pthread_mutex_lock/pthread_mutex_unlock: %7.3lf us\n",
+        (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 100000.0));
 }
 
 #ifndef _MSC_VER
@@ -257,7 +265,8 @@ void test_mono()
     }
     clock_gettime(CLOCK_MONOTONIC, &tp2);
 
-    fprintf(stdout, "               QueryPerformanceFrequency: %7.3lf us\n", (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
+    fprintf(stdout, "               QueryPerformanceFrequency: %7.3lf us\n",
+        (tp2.tv_nsec - tp.tv_nsec + (tp2.tv_sec - tp.tv_sec) * POW10_9) / (TEST_TIMES * 1000.0));
 }
 
 int main(int argc, char *argv[])
