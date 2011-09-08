@@ -46,11 +46,11 @@ void test_clock_getres(char *name, int id)
     printf("%s time: %d.%09d sec\n", name, (int) t1.tv_sec, (int) t1.tv_nsec);
 
     if (id == CLOCK_REALTIME || id == CLOCK_MONOTONIC) {
-        struct timespec request = {1, 0};
+        struct timespec request = {0, 125000000};
         clock_nanosleep(CLOCK_REALTIME, 0, &request, NULL);
     } else {
         long i;
-        for (i = 0; i < 100000000; i++) {
+        for (i = 0; i < 10000000; i++) {
             rand();
         }
     }

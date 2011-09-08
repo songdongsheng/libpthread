@@ -18,16 +18,19 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
+
+#if !defined(_WIN32_WINNT) || _WIN32_WINNT < 0x0600
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0600
+#endif
 
 #include <winsock2.h>
-#include <pthread.h>
 
 int main(int argc, char *argv[])
 {
-    SRWLOCK rw; /* InitializeSRWLock */
-    CONDITION_VARIABLE cv; /* InitializeConditionVariable */
-    CRITICAL_SECTION cs; /* InitializeCriticalSectionAndSpinCount */
+    /* SRWLOCK rw; InitializeSRWLock */
+    /* CONDITION_VARIABLE cv; InitializeConditionVariable */
+    /* CRITICAL_SECTION cs; InitializeCriticalSectionAndSpinCount */
 
 #ifdef _WIN64
     printf("On 64-bit OS:\n");
@@ -35,7 +38,6 @@ int main(int argc, char *argv[])
     printf("On 32-bit OS:\n");
 #endif
 
-    printf("sizeof(pthread_attr_t): %u\n", sizeof(pthread_attr_t));
     printf("sizeof(CRITICAL_SECTION): %u\n", sizeof(CRITICAL_SECTION));
     printf("sizeof(SRWLOCK): %u\n", sizeof(SRWLOCK));
     printf("sizeof(CONDITION_VARIABLE): %u\n", sizeof(CONDITION_VARIABLE));

@@ -36,7 +36,7 @@ unsigned __stdcall start_address(void *dummy)
     int counter = 0;
     struct timespec request = { 1, 0 }, remain;
 
-    while (counter < 5) {
+    while (counter < 3) {
         int rc = nanosleep(&request, &remain);
         if (rc != 0) {
             printf("nanosleep interrupted, remain %d.%09d sec.\n",
@@ -59,7 +59,7 @@ void WINAPI usr_apc(ULONG_PTR dwParam)
 
 void test_apc()
 {
-    long i, rc, data[5];
+    long i, rc, data[3];
     HANDLE thread;
 
     thread = (HANDLE) _beginthreadex(NULL, 0, start_address, NULL, 0, NULL);
@@ -67,9 +67,9 @@ void test_apc()
         exit(1);
     }
 
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < 3; i++) {
         data[i] = i;
-        Sleep(250 + rand() % 250);
+        Sleep(100 + rand() % 150);
         rc = QueueUserAPC(usr_apc, thread, (ULONG_PTR) & data[i]);
         if (rc == 0) {
             printf("QueueUserAPC failed: %ld\n", GetLastError());

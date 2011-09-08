@@ -28,7 +28,7 @@
 void test_clock_nanosleep()
 {
     int rc;
-    struct timespec tp, request = { 1, 0 }, remain;
+    struct timespec tp, request = { 0, 125000000 }, remain;
 
     rc = clock_nanosleep(CLOCK_MONOTONIC, 0, &request, &remain);
     assert(rc == -1 && errno == EINVAL);
@@ -42,7 +42,7 @@ void test_clock_nanosleep()
     rc = clock_gettime(CLOCK_REALTIME, &tp);
     assert(rc == 0);
     printf("[%10"PRId64".%09d] clock_gettime (CLOCK_REALTIME)\n", (__int64) tp.tv_sec, (int) tp.tv_nsec);
-    
+
     rc = clock_nanosleep(CLOCK_REALTIME, 0, &request, &remain);
     assert(rc == 0);
 

@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include <windows.h>
+
 #ifdef _MSC_VER
 #include <intrin.h>
 #pragma intrinsic(_ReadWriteBarrier)
@@ -43,9 +45,13 @@ int main(int argc, char *argv[])
 
 /* cpu_relax() */
 #ifdef _MSC_VER
-    __asm pause
+    /* __asm pause */
+    /* __asm rep nop */
+    /* _mm_pause(); */
+    YieldProcessor();
 #else
-    asm volatile ( "pause" ::: "memory" );
+    /* __builtin_ia32_pause(); gcc 4.7 */
+    asm volatile("rep; nop" ::: "memory");
 #endif
 
     printf("test_pause passed\n");
