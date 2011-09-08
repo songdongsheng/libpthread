@@ -1,4 +1,5 @@
 ADD_EXECUTABLE (test_max_key test_max_key.c)
+ADD_EXECUTABLE (test_realtime test_realtime.c)
 
 ADD_EXECUTABLE (test_sched test_sched.c)
 TARGET_LINK_LIBRARIES (test_sched ${LIBPTHREAD_NAME})
@@ -47,6 +48,7 @@ TARGET_LINK_LIBRARIES (test_clock_settime ${LIBPTHREAD_NAME})
 
 # http://www.cmake.org/Wiki/CMake_Testing_With_CTest
 ADD_TEST (test_max_key test_max_key)
+ADD_TEST (test_realtime test_realtime)
 
 ADD_TEST (test_sched test_sched)
 ADD_TEST (test_sem test_sem)
