@@ -1,4 +1,5 @@
 ADD_LIBRARY (${LIBPTHREAD_NAME} SHARED libpthread.def version.rc
+        barrier.c
         clock.c
         key.c
         mutex.c

@@ -249,12 +249,12 @@ int pthread_mutex_timedlock(pthread_mutex_t *mutex, const struct timespec *abs_t
 int pthread_mutex_unlock(pthread_mutex_t *mutex);
 int pthread_mutex_destroy(pthread_mutex_t *mutex);
 
-int pthread_barrierattr_init(void **attr);
-int pthread_barrierattr_setpshared(void **attr, int s);
-int pthread_barrierattr_getpshared(void **attr, int *s);
-int pthread_barrierattr_destroy(void **attr);
+int pthread_barrierattr_init(pthread_barrierattr_t *attr);
+int pthread_barrierattr_getpshared(const pthread_barrierattr_t *attr, int *s);
+int pthread_barrierattr_setpshared(pthread_barrierattr_t *attr, int s);
+int pthread_barrierattr_destroy(pthread_barrierattr_t *attr);
 
-int pthread_barrier_init(pthread_barrier_t *barrier, const void *attr, unsigned int count);
+int pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, unsigned int count);
 int pthread_barrier_wait(pthread_barrier_t *barrier);
 int pthread_barrier_destroy(pthread_barrier_t *barrier);
 

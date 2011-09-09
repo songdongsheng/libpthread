@@ -83,6 +83,10 @@ typedef struct {
  */
 
 typedef struct {
+
+    /* PTHREAD_MUTEX_STALLED or PTHREAD_MUTEX_ROBUST */
+    int robust;
+
     /*
      * PTHREAD_MUTEX_NORMAL, PTHREAD_MUTEX_ERRORCHECK,
      * PTHREAD_MUTEX_RECURSIVE, or PTHREAD_MUTEX_DEFAULT
@@ -112,9 +116,9 @@ typedef struct {
 } arch_barrier_attr;
 
 typedef struct {
-    int count;
-    int total;
-    int index;
+    long count;
+    long total;
+    long index;
     HANDLE semaphore[2];
 } arch_barrier;
 

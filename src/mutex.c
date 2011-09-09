@@ -46,9 +46,38 @@ int pthread_mutexattr_init(pthread_mutexattr_t *attr)
 
     pv->type = PTHREAD_MUTEX_DEFAULT;
     pv->pshared = PTHREAD_PROCESS_PRIVATE;
+    pv->robust = PTHREAD_MUTEX_STALLED;
 
     *attr = pv;
 
+    return 0;
+}
+
+/**
+ * Get the mutex robust attribute.
+ * @param attr The pointer of the mutex attribute object.
+ * @param robust The mutex robust attribute.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_mutexattr_getrobust(const pthread_mutexattr_t *attr, int *robust)
+{
+    arch_mutex_attr *pv = (arch_mutex_attr *) attr;
+    *robust = pv->robust;
+    return 0;
+}
+
+/**
+ * Set the mutex robust attribute.
+ * @param attr The pointer of the mutex attribute object.
+ * @param robust The mutex robust attribute.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_mutexattr_setrobust(pthread_mutexattr_t *attr, int robust)
+{
+    arch_mutex_attr *pv = (arch_mutex_attr *) attr;
+    pv->robust = robust;
     return 0;
 }
 
@@ -252,6 +281,44 @@ int pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a)
 {
     *m = NULL;
     return arch_mutex_init(m, 0);
+}
+
+/**
+ * Get the mutex prioceiling attribute.
+ * @param mutex The pointer of the mutex object.
+ * @param prioceiling The mutex prioceiling attribute.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_mutex_getprioceiling(const pthread_mutex_t *mutex, int *prioceiling)
+{
+    *prioceiling = 0;
+    return 0;
+}
+
+/**
+ * Set the mutex prioceiling attribute.
+ * @param mutex The pointer of the mutex object.
+ * @param prioceiling The new mutex prioceiling attribute.
+ * @param old_ceiling The old mutex prioceiling attribute.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_mutex_setprioceiling(pthread_mutex_t *mutex, int prioceiling, int *old_ceiling)
+{
+    *old_ceiling = 0;
+    return 0;
+}
+
+/**
+ * Mark state protected by robust mutex as consistent.
+ * @param mutex The pointer of the mutex object.
+ * @return Always return 0.
+ * @remark This function is provided for source code compatibility but no effect when called.
+ */
+int pthread_mutex_consistent(pthread_mutex_t *mutex)
+{
+    return 0;
 }
 
 /**
