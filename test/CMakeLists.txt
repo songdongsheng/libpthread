@@ -6,9 +6,6 @@ ADD_EXECUTABLE (test_realtime test_realtime.c)
 ADD_EXECUTABLE (test_size test_size.c)
 ADD_EXECUTABLE (test_sleep test_sleep.c)
 
-ADD_EXECUTABLE (test_clock test_clock.c)
-TARGET_LINK_LIBRARIES (test_clock ${LIBPTHREAD_NAME})
-
 ADD_EXECUTABLE (test_clock_getres test_clock_getres.c)
 TARGET_LINK_LIBRARIES (test_clock_getres ${LIBPTHREAD_NAME})
 
@@ -59,7 +56,6 @@ TARGET_LINK_LIBRARIES (test_spin ${LIBPTHREAD_NAME})
 #ADD_TEST (test_size test_size)
 #ADD_TEST (test_sleep test_sleep)
 
-#ADD_TEST (test_clock test_clock)
 ADD_TEST (test_clock_getres test_clock_getres)
 ADD_TEST (test_clock_gettime test_clock_gettime)
 ADD_TEST (test_clock_nanosleep test_clock_nanosleep)
