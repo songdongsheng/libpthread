@@ -34,16 +34,13 @@
 /**
  * Initialize a spin rwlock.
  * @param  lock The spin rwlock object.
- * @return If it can acquire memory immediately, the return value is 0.
- *         Otherwise, ENOMEM returned to indicate the error.
+ * @return Always return 0.
  */
 int pthread_spin_rwlock_init(pthread_spin_rwlock_t *lock)
 {
-    arch_spin_rwlock *pv = calloc(1, sizeof(arch_spin_rwlock));
-    if (pv == NULL)
-        return ENOMEM;
-
-    *lock = pv;
+    lock->owner = 0;
+    lock->ticket = 0;
+    lock->readers = 0;
 
     return 0;
 }
@@ -55,17 +52,12 @@ int pthread_spin_rwlock_init(pthread_spin_rwlock_t *lock)
  */
 int pthread_spin_rwlock_reader_lock(pthread_spin_rwlock_t *lock)
 {
-    int id;
-    arch_spin_rwlock *pv = (arch_spin_rwlock *) *lock;
-    if (pv == NULL)
-        return EINVAL;
-
-    id = atomic_fetch_and_add(& pv->ticket, 1);
-    while (atomic_read(& pv->owner) != id)
+    int id = atomic_fetch_and_add(& lock->ticket, 1);
+    while (atomic_read(& lock->owner) != id)
         cpu_relax();
 
-    atomic_fetch_and_add(& pv->readers, 1);
-    pv->owner++;
+    atomic_fetch_and_add(& lock->readers, 1);
+    lock->owner++;
 
     return 0;
 }
@@ -77,11 +69,7 @@ int pthread_spin_rwlock_reader_lock(pthread_spin_rwlock_t *lock)
  */
 int pthread_spin_rwlock_reader_unlock(pthread_spin_rwlock_t *lock)
 {
-    arch_spin_rwlock *pv = (arch_spin_rwlock *) *lock;
-    if (pv == NULL)
-        return EINVAL;
-
-    atomic_fetch_and_add(& pv->readers, -1);
+    atomic_fetch_and_add(& lock->readers, -1);
 
     return 0;
 }
@@ -93,16 +81,11 @@ int pthread_spin_rwlock_reader_unlock(pthread_spin_rwlock_t *lock)
  */
 int pthread_spin_rwlock_writer_lock(pthread_spin_rwlock_t *lock)
 {
-    int id;
-    arch_spin_rwlock *pv = (arch_spin_rwlock *) *lock;
-    if (pv == NULL)
-        return EINVAL;
-
-    id = atomic_fetch_and_add(& pv->ticket, 1);
-    while (atomic_read(& pv->owner) != id)
+    int id = atomic_fetch_and_add(& lock->ticket, 1);
+    while (atomic_read(& lock->owner) != id)
         cpu_relax();
 
-    while (atomic_read(& pv->readers) > 0)
+    while (atomic_read(& lock->readers) > 0)
         cpu_relax();
 
     return 0;
@@ -115,11 +98,7 @@ int pthread_spin_rwlock_writer_lock(pthread_spin_rwlock_t *lock)
  */
 int pthread_spin_rwlock_writer_unlock(pthread_spin_rwlock_t *lock)
 {
-    arch_spin_rwlock *pv = (arch_spin_rwlock *) *lock;
-    if (pv == NULL)
-        return EINVAL;
-
-    pv->owner++;
+    lock->owner++;
 
     return 0;
 }
@@ -131,9 +110,9 @@ int pthread_spin_rwlock_writer_unlock(pthread_spin_rwlock_t *lock)
  */
 int pthread_spin_rwlock_destroy(pthread_spin_rwlock_t *lock)
 {
-    arch_spin_rwlock *pv = (arch_spin_rwlock *) *lock;
-    if (pv != NULL)
-        free(pv);
+    lock->owner = 0;
+    lock->ticket = 0;
+    lock->readers = 0;
 
     return 0;
 }

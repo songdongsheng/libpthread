@@ -137,11 +137,6 @@ typedef void *pthread_attr_t;
 typedef long pthread_once_t;
 typedef long pthread_key_t;
 
-typedef struct {
-    long owner;
-    long ticket;
-} pthread_spinlock_t;
-
 typedef void    *pthread_mutexattr_t;
 typedef void    *pthread_condattr_t;
 typedef void    *pthread_rwlockattr_t;
@@ -151,7 +146,17 @@ typedef void    *pthread_mutex_t;
 typedef void    *pthread_cond_t;
 typedef void    *pthread_rwlock_t;
 typedef void    *pthread_barrier_t;
-typedef void    *pthread_spin_rwlock_t;
+
+typedef struct {
+    long owner;
+    long ticket;
+} pthread_spinlock_t;
+
+typedef struct {
+    long owner;
+    long ticket;
+    long readers;
+} pthread_spin_rwlock_t;
 
 /*
     #include <signal.h>

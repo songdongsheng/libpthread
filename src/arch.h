@@ -135,12 +135,6 @@ typedef struct {
     char rwlock[8]; /* InitializeSRWLock */
 } arch_rwlock;
 
-typedef struct {
-    long ticket;
-    long owner;
-    long readers;
-} arch_spin_rwlock;
-
 /** @} */
 
 #endif
