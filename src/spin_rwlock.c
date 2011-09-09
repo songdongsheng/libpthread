@@ -34,10 +34,15 @@
 /**
  * Initialize a spin rwlock.
  * @param  lock The spin rwlock object.
- * @return Always return 0.
+ * @param  pshared Must be PTHREAD_PROCESS_PRIVATE (0).
+ * @return If the pshared is PTHREAD_PROCESS_PRIVATE, the return value is 0.
+ *         Otherwise, EINVAL returned to indicate the error.
  */
-int pthread_spin_rwlock_init(pthread_spin_rwlock_t *lock)
+int pthread_spin_rwlock_init(pthread_spin_rwlock_t *lock, int pshared)
 {
+    if (PTHREAD_PROCESS_PRIVATE != pshared)
+        return EINVAL;
+
     lock->owner = 0;
     lock->ticket = 0;
     lock->readers = 0;

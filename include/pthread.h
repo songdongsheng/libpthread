@@ -125,6 +125,7 @@ extern "C" {
 #define PTHREAD_MUTEX_ROBUST        1
 
 #define PTHREAD_SPINLOCK_INITIALIZER    {0, 0}
+#define PTHREAD_SPIN_RWLOCK_INITIALIZER {0, 0, 0}
 #define PTHREAD_MUTEX_INITIALIZER       NULL
 #define PTHREAD_RWLOCK_INITIALIZER      NULL
 #define PTHREAD_COND_INITIALIZER        NULL
@@ -218,7 +219,7 @@ int pthread_spin_trylock(pthread_spinlock_t *lock);
 int pthread_spin_unlock(pthread_spinlock_t *lock);
 int pthread_spin_destroy(pthread_spinlock_t *lock);
 
-int pthread_spin_rwlock_init(pthread_spin_rwlock_t *lock);
+int pthread_spin_rwlock_init(pthread_spin_rwlock_t *lock, int pshared);
 int pthread_spin_rwlock_reader_lock(pthread_spin_rwlock_t *lock);
 int pthread_spin_rwlock_reader_unlock(pthread_spin_rwlock_t *lock);
 int pthread_spin_rwlock_writer_lock(pthread_spin_rwlock_t *lock);

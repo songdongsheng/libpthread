@@ -39,14 +39,17 @@ TARGET_LINK_LIBRARIES (test_sem ${LIBPTHREAD_NAME})
 ADD_EXECUTABLE (test_speed test_speed.c)
 TARGET_LINK_LIBRARIES (test_speed ${LIBPTHREAD_NAME})
 
+ADD_EXECUTABLE (test_spin test_spin.c)
+TARGET_LINK_LIBRARIES (test_spin ${LIBPTHREAD_NAME})
+
+ADD_EXECUTABLE (test_spin_rwlock test_spin_rwlock.c)
+TARGET_LINK_LIBRARIES (test_spin_rwlock ${LIBPTHREAD_NAME})
+
 ADD_EXECUTABLE (test_thread_create test_thread_create.c)
 TARGET_LINK_LIBRARIES (test_thread_create ${LIBPTHREAD_NAME})
 
 ADD_EXECUTABLE (test_thread_join test_thread_join.c)
 TARGET_LINK_LIBRARIES (test_thread_join ${LIBPTHREAD_NAME})
-ADD_EXECUTABLE (test_spin test_spin.c)
-TARGET_LINK_LIBRARIES (test_spin ${LIBPTHREAD_NAME})
-
 # http://www.cmake.org/Wiki/CMake_Testing_With_CTest
 #ADD_TEST (test_init test_init)
 #ADD_TEST (test_int64 test_int64)
@@ -68,5 +71,6 @@ ADD_TEST (test_sched test_sched)
 ADD_TEST (test_sem test_sem)
 #ADD_TEST (test_speed test_speed)
 ADD_TEST (test_spin test_spin)
+ADD_TEST (test_spin_rwlock test_spin_rwlock)
 ADD_TEST (test_thread_create test_thread_create)
 ADD_TEST (test_thread_join test_thread_join)
