@@ -124,7 +124,7 @@ extern "C" {
 #define PTHREAD_MUTEX_STALLED       0
 #define PTHREAD_MUTEX_ROBUST        1
 
-#define PTHREAD_SPINLOCK_INITIALIZER    0
+#define PTHREAD_SPINLOCK_INITIALIZER    {0, 0}
 #define PTHREAD_MUTEX_INITIALIZER       NULL
 #define PTHREAD_RWLOCK_INITIALIZER      NULL
 #define PTHREAD_COND_INITIALIZER        NULL
@@ -136,7 +136,11 @@ typedef void *pthread_attr_t;
 
 typedef long pthread_once_t;
 typedef long pthread_key_t;
-typedef long pthread_spinlock_t;
+
+typedef struct {
+    long owner;
+    long ticket;
+} pthread_spinlock_t;
 
 typedef void    *pthread_mutexattr_t;
 typedef void    *pthread_condattr_t;
