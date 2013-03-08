@@ -15,10 +15,17 @@ or
   * Web View: http://code.google.com/p/libpthread/source/browse/
   * git clone https://code.google.com/p/libpthread
 
+== Important
+If you want pthread_rwlock_* and pthread_cond_* support, please
+compiled for Windows Vista/Server 2008 or later.
+
 == Requirements
 Following programs are requred to build:
   - CMake 2.8 or later
 
-  - The source files can only be compiled by MSVC or GCC:
-    * Microsoft Visual C++ 2008 or later
-    * MinGW-w64 gcc 4.6 or later
+  - The source files can only be compiled by MSVC, ICC or GCC:
+    * Microsoft Visual C++ 2010 (Service Pack 1 or later)
+    * Microsoft Visual C++ 2012 (Update 1 or later)
+    * Intel C++ Compiler XE 2011 (v12.1 Update 7 or later)
+    * Intel C++ Compiler XE 2013 (v13.0 Update 1 or later)
+    * MinGW-w64 gcc 4.7 (4.7.2 or later)
